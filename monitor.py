@@ -139,7 +139,18 @@ def wizard_blocks(page: Page) -> list[str]:
         text = normalize(page.locator("body").inner_text(timeout=5_000))
         if not text:
             raise StructureError(f"Vivenu wizard returned an empty result for {name}")
-        blocks.append(f"{name} {text}")
+        # Vivenu may show excluded alternatives beside the selected Open branch.
+        # Keep only leaf-ish blocks with recognizable status wording, and reject
+        # exclusions per ticket card rather than rejecting the whole results page.
+        status_blocks = [
+            block for block in candidate_blocks(page)
+            if not EXCLUDED.search(block) and classify(block) != "unknown"
+        ]
+        if not status_blocks and not EXCLUDED.search(text) and classify(text) != "unknown":
+            status_blocks = [text]
+        if not status_blocks:
+            raise StructureError(f"Vivenu returned no recognizable Open ticket status for {name}")
+        blocks.extend(f"{name} {block}" for block in status_blocks)
     return blocks
 
 
