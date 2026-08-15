@@ -73,10 +73,10 @@ jobs:
 
       # Notify first: if issue delivery ever fails, the old state remains and
       # the next scheduled run retries the alert instead of silently losing it.
-      - name: Persist changed state
+      - name: Persist rolling state
         if: success()
         run: |
-          if git cat-file -e HEAD:state/current.json 2>/dev/null && git diff --quiet -- state/current.json; then exit 0; fi
+          if git diff --quiet -- state/current.json; then exit 0; fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -f state/current.json
