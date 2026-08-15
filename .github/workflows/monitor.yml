@@ -1,0 +1,84 @@
+name: HYROX Anaheim availability
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Both PDT and PST UTC windows. The script's Pacific-time guard removes
+    # the extra DST-overlap invocations.
+    - cron: "5 7-9,14-20 * * *"
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: hyrox-anaheim-monitor
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PYTHONUNBUFFERED: "1"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+      - run: playwright install --with-deps chromium
+      - run: pytest -q
+
+      - name: Check availability
+        id: monitor
+        run: >-
+          python monitor.py
+          ${{ github.event_name == 'schedule' && '--schedule-guard' || '' }}
+
+      - name: Upload diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hyrox-diagnostics-${{ github.run_id }}
+          path: diagnostics/
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Render GitHub notification
+        if: >-
+          steps.monitor.outputs.changed == 'true' ||
+          steps.monitor.outputs.block_summary_due == 'true'
+        env:
+          HYROX_CHANGES: ${{ steps.monitor.outputs.changes }}
+          HYROX_NOTIFY_USERS: ${{ vars.HYROX_NOTIFY_USERS }}
+        run: python notify.py
+
+      - name: Post GitHub notification
+        if: >-
+          steps.monitor.outputs.changed == 'true' ||
+          steps.monitor.outputs.block_summary_due == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          issue_number="$(gh issue list --state open --search 'HYROX Anaheim ticket monitor in:title' --json number,title --jq '.[] | select(.title == "HYROX Anaheim ticket monitor") | .number' | head -1)"
+          if [ -n "$issue_number" ]; then
+            gh issue comment "$issue_number" --body-file notification.md
+          else
+            gh issue create --title "HYROX Anaheim ticket monitor" --body-file notification.md
+          fi
+
+      # Notify first: if issue delivery ever fails, the old state remains and
+      # the next scheduled run retries the alert instead of silently losing it.
+      - name: Persist changed state
+        if: success()
+        run: |
+          if [ -z "$(git status --porcelain -- state/current.json)" ]; then exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f state/current.json
+          git commit -m "chore: update ticket availability state [skip ci]"
+          git push
