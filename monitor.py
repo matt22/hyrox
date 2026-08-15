@@ -18,7 +18,7 @@ from zoneinfo import ZoneInfo
 from playwright.sync_api import Page, TimeoutError as PlaywrightTimeoutError, sync_playwright
 
 
-EVENT_URL = "https://hyrox.com/event/hyrox-anaheim-26-27/"
+EVENT_URL = "https://usa.hyrox.com/events/hyrox-anaheim-season-26-27-edyxxn"
 PACIFIC = ZoneInfo("America/Los_Angeles")
 RUN_HOURS = {0, 1, 7, 8, 9, 10, 11, 12}
 
@@ -116,6 +116,8 @@ def candidate_blocks(page: Page) -> list[str]:
 def open_ticket_shop(page: Page, url: str) -> None:
     page.goto(url, wait_until="domcontentloaded", timeout=60_000)
     page.wait_for_timeout(3_000)
+    if "usa.hyrox.com" in page.url:
+        return
     # Cookie overlays can cover the ticket link but do not affect deterministic parsing.
     for label in ("Accept All", "Accept all", "Allow all", "I agree"):
         button = page.get_by_role("button", name=label, exact=True)

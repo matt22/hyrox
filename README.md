@@ -53,4 +53,4 @@ python monitor.py
 ```
 
 Override the source page with `HYROX_TICKET_URL` or `--url` if HYROX changes the
-canonical event URL.
+canonical Vivenu ticket-shop URL.
