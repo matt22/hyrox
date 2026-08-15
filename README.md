@@ -26,7 +26,8 @@ hours (currently 8 per day, or 16 observations) rather than hardcoded. Successfu
 manual checks count toward the same cap; failed and schedule-guard-skipped runs do not
 produce observations. Its metadata reports, per ticket category, both the number of
 available observations and the number of transitions into availability during the
-retained observations.
+retained observations. `total_openings` provides a quick sum of all such opening
+transitions still in the rolling history.
 Unexpected page structures fail the job and upload
 HTML, visible text, a screenshot, and error context as a 14-day diagnostic artifact.
 Routine checks contain no AI calls; Codex can be used separately to inspect failures.

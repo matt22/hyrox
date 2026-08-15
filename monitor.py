@@ -289,6 +289,7 @@ def rolling_state(previous: dict | None, current: dict, limit: int | None = None
     }
     return {
         "meta": {
+            "total_openings": sum(len(item.get("opened", [])) for item in history),
             "retention_days": HISTORY_DAYS,
             "max_observations": limit,
             "observation_count": len(history),
