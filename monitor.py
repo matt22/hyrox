@@ -21,6 +21,7 @@ from playwright.sync_api import Page, TimeoutError as PlaywrightTimeoutError, sy
 EVENT_URL = "https://usa.hyrox.com/events/hyrox-anaheim-season-26-27-edyxxn"
 PACIFIC = ZoneInfo("America/Los_Angeles")
 RUN_HOURS = {0, 1, 7, 8, 9, 10, 11, 12}
+HISTORY_DAYS = 2
 
 # Keep this list deliberately narrow. Matching happens after excluded ticket types
 # are rejected, so Charity/Adaptive/Pro/Spectator variants never leak in.
@@ -234,7 +235,7 @@ def state_payload(tickets: dict[str, Ticket], url: str) -> dict:
 def changes(previous: dict | None, current: dict) -> list[str]:
     if not previous:
         return []
-    old = previous.get("tickets", {})
+    old = latest_observation(previous).get("tickets", {})
     lines = []
     for name, ticket in current["tickets"].items():
         before = old.get(name, {}).get("status", "unknown")
@@ -242,6 +243,61 @@ def changes(previous: dict | None, current: dict) -> list[str]:
         if before != after:
             lines.append(f"{name}: {before} -> {after}")
     return lines
+
+
+def latest_observation(state: dict) -> dict:
+    """Return the newest observation from either the rolling or legacy schema."""
+    history = state.get("history", [])
+    return history[-1] if history else state
+
+
+def requested_history_limit() -> int:
+    """Derive retention from the requested daily Pacific run hours."""
+    return len(RUN_HOURS) * HISTORY_DAYS
+
+
+def rolling_state(previous: dict | None, current: dict, limit: int | None = None) -> dict:
+    """Append a successful observation and retain the requested history size."""
+    limit = requested_history_limit() if limit is None else limit
+    if limit < 1:
+        raise ValueError("Rolling history limit must be positive")
+    history = list(previous.get("history", [])) if previous else []
+    if previous and not history and previous.get("checked_at"):
+        # One-time migration from the original latest-observation-only schema.
+        history.append(previous)
+
+    prior = latest_observation(previous) if previous else None
+    prior_tickets = prior.get("tickets", {}) if prior else {}
+    opened = [
+        name for name, ticket in current["tickets"].items()
+        if prior is not None
+        and ticket["status"] == "available"
+        and prior_tickets.get(name, {}).get("status") != "available"
+    ]
+    observation = {**current, "opened": opened}
+    history.append(observation)
+    history = history[-limit:]
+    openings = {
+        name: {
+            "available_observations": sum(
+                item.get("tickets", {}).get(name, {}).get("status") == "available"
+                for item in history
+            ),
+            "opening_transitions": sum(name in item.get("opened", []) for item in history),
+        }
+        for name in TARGET_PATTERNS
+    }
+    return {
+        "meta": {
+            "retention_days": HISTORY_DAYS,
+            "max_observations": limit,
+            "observation_count": len(history),
+            "window_start": history[0]["checked_at"],
+            "window_end": history[-1]["checked_at"],
+            "openings": openings,
+        },
+        "history": history,
+    }
 
 
 def scheduled_now(now: datetime | None = None) -> bool:
@@ -280,10 +336,10 @@ def main() -> int:
     delta = changes(previous, current)
     args.snapshot.parent.mkdir(parents=True, exist_ok=True)
     args.snapshot.write_text(json.dumps(current, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    # Do not rewrite the timestamp/evidence on unchanged checks. This keeps routine
-    # workflow runs free of noisy state commits.
-    if previous is None or delta:
-        args.state.write_text(json.dumps(current, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    rolling = rolling_state(previous, current)
+    # Preserve the intentionally human-oriented schema order: metadata first,
+    # followed by chronological observations.
+    args.state.write_text(json.dumps(rolling, indent=2) + "\n", encoding="utf-8")
     Path(os.getenv("GITHUB_OUTPUT", os.devnull)).open("a", encoding="utf-8").write(
         f"initialized={'true' if previous else 'false'}\n"
         f"changed={'true' if delta else 'false'}\n"
