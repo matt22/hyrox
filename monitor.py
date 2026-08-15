@@ -116,8 +116,6 @@ def candidate_blocks(page: Page) -> list[str]:
 def open_ticket_shop(page: Page, url: str) -> None:
     page.goto(url, wait_until="domcontentloaded", timeout=60_000)
     page.wait_for_timeout(3_000)
-    if "usa.hyrox.com" in page.url:
-        return
     # Cookie overlays can cover the ticket link but do not affect deterministic parsing.
     for label in ("Accept All", "Accept all", "Allow all", "I agree"):
         button = page.get_by_role("button", name=label, exact=True)
@@ -127,6 +125,14 @@ def open_ticket_shop(page: Page, url: str) -> None:
             except Exception:
                 pass
             break
+
+    if "usa.hyrox.com" in page.url:
+        button = page.get_by_role("button", name="Buy Tickets", exact=True)
+        if not button.count():
+            raise StructureError("The canonical ticket shop did not expose its Buy Tickets button")
+        button.first.click(timeout=8_000)
+        page.wait_for_timeout(3_000)
+        return
 
     ticket_links = page.locator("a", has_text=re.compile(r"buy|ticket|register", re.I))
     for index in range(min(ticket_links.count(), 20)):
