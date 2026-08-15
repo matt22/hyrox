@@ -31,6 +31,13 @@ TARGET_PATTERNS = {
     "Mixed Open Doubles": (r"\bmixed\b", r"\bdoubles?\b"),
     "Mixed Open Relay": (r"\bmixed\b", r"\brelay\b"),
 }
+TARGET_WIZARD_PATHS = {
+    "Men's Open Singles": ("Singles", "Open", "Men"),
+    "Women's Open Singles": ("Singles", "Open", "Women"),
+    "Women's Open Doubles": ("Doubles", "Open", "Women"),
+    "Mixed Open Doubles": ("Doubles", "Open", "Mixed"),
+    "Mixed Open Relay": ("Relay", "Open", "Mixed"),
+}
 EXCLUDED = re.compile(r"\b(charity|adaptive|pro|spectator|youngstars?)\b", re.I)
 AVAILABLE = re.compile(r"\b(buy|select|register|available|from\s+\$|add)\b", re.I)
 UNAVAILABLE = re.compile(r"\b(sold\s*out|unavailable|waitlist|closed|coming\s*soon)\b", re.I)
@@ -113,6 +120,29 @@ def candidate_blocks(page: Page) -> list[str]:
     return list(dict.fromkeys(blocks))
 
 
+def wizard_blocks(page: Page) -> list[str]:
+    """Traverse only the five explicitly requested Vivenu wizard branches."""
+    ticket_url = page.url
+    blocks = []
+    for name, path in TARGET_WIZARD_PATHS.items():
+        page.goto(ticket_url, wait_until="domcontentloaded", timeout=60_000)
+        page.wait_for_timeout(1_500)
+        for step in path:
+            button = page.get_by_role("button", name=step, exact=True)
+            if not button.count():
+                # Some event configurations omit the redundant Open stage.
+                if step == "Open":
+                    continue
+                raise StructureError(f"Vivenu wizard path for {name} has no {step!r} option")
+            button.first.click(timeout=8_000)
+            page.wait_for_timeout(750)
+        text = normalize(page.locator("body").inner_text(timeout=5_000))
+        if not text:
+            raise StructureError(f"Vivenu wizard returned an empty result for {name}")
+        blocks.append(f"{name} {text}")
+    return blocks
+
+
 def open_ticket_shop(page: Page, url: str) -> None:
     page.goto(url, wait_until="domcontentloaded", timeout=60_000)
     page.wait_for_timeout(3_000)
@@ -172,7 +202,8 @@ def check(url: str, diagnostics: Path, headless: bool = True) -> dict[str, Ticke
         page = context.new_page()
         try:
             open_ticket_shop(page, url)
-            return parse_ticket_texts(candidate_blocks(page))
+            blocks = wizard_blocks(page) if "usa.hyrox.com/tickets/" in page.url else candidate_blocks(page)
+            return parse_ticket_texts(blocks)
         except Exception as error:
             capture(page, diagnostics, error)
             raise
