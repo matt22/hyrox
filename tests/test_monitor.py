@@ -67,6 +67,7 @@ def test_rolling_state_migrates_legacy_state_and_counts_openings():
     current = observation("2026-08-15T09:00:00+00:00", "available")
     state = rolling_state(old, current)
     assert state["meta"]["observation_count"] == 2
+    assert state["meta"]["total_openings"] == len(state["meta"]["openings"])
     assert state["meta"]["openings"]["Mixed Open Relay"] == {
         "available_observations": 1,
         "opening_transitions": 1,
@@ -93,6 +94,18 @@ def test_rolling_state_evicts_only_the_oldest_observation_at_the_limit():
     assert state["meta"]["observation_count"] == requested_history_limit()
     assert state["meta"]["max_observations"] == requested_history_limit()
     assert state["history"][0]["checked_at"] == "2026-08-15T01:00:00+00:00"
+
+
+def test_total_openings_decrements_when_opening_observation_is_evicted():
+    state = rolling_state(None, observation("2026-08-15T00:00:00+00:00", "unavailable"), limit=2)
+    state = rolling_state(state, observation("2026-08-15T01:00:00+00:00", "available"), limit=2)
+    assert state["meta"]["total_openings"] == len(state["meta"]["openings"])
+
+    state = rolling_state(state, observation("2026-08-15T02:00:00+00:00", "available"), limit=2)
+    assert state["meta"]["total_openings"] == len(state["meta"]["openings"])
+
+    state = rolling_state(state, observation("2026-08-15T03:00:00+00:00", "unavailable"), limit=2)
+    assert state["meta"]["total_openings"] == 0
 
 
 @pytest.mark.parametrize("utc_hour, expected", [(7, True), (8, True), (14, True), (19, True), (20, False)])
