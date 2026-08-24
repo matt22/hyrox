@@ -200,7 +200,7 @@ function render(data) {
   showDetail(categories[0], latest);
 }
 
-fetch('current.json', { cache: 'no-store' })
+fetch('state/current.json', { cache: 'no-store' })
   .then((response) => {
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     return response.json();
@@ -208,7 +208,7 @@ fetch('current.json', { cache: 'no-store' })
   .then(render)
   .catch((error) => {
     document.querySelector('#last-updated').textContent = 'Data unavailable';
-    document.querySelector('#summary').innerHTML = `<div class="col-span-full bg-panel p-4 text-sm text-coral">Could not load current.json (${error.message}). Serve this repository through a local web server.</div>`;
+    document.querySelector('#summary').innerHTML = `<div class="col-span-full bg-panel p-4 text-sm text-coral">Could not load state/current.json (${error.message}). Serve this repository through a local web server.</div>`;
   });
 
 function closePopovers(exceptId = null) {
