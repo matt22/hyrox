@@ -31,10 +31,58 @@ const escapeHtml = (value) => String(value)
   .replaceAll('"', '&quot;')
   .replaceAll("'", '&#039;');
 
-const formatEvidence = (evidence) => evidence
-  .split(/\s*\|\s*/)
-  .map((line) => `<span class="block border-b border-line/50 py-1.5 first:pt-0 last:border-0 last:pb-0">${escapeHtml(line)}</span>`)
-  .join('');
+const cleanEvidenceLine = (line) => line
+  .replace(/\b(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\s+\1\b/gi, '$1')
+  .replace(/\s+UNAVAILABLE\s+HYROX\s+(.+)$/i, (_, division) => {
+    const titleCaseDivision = division.toLowerCase().replace(/\b\w/g, (letter) => letter.toUpperCase());
+    return ` — HYROX ${titleCaseDivision}`;
+  });
+
+const formatEvidence = (evidence, fallbackStatus) => {
+  const rawLines = evidence.split(/\s*\|\s*/);
+  const dates = [];
+  const metadata = [];
+  let offeringHeading = '';
+  let pendingStatus = fallbackStatus;
+
+  rawLines.forEach((rawLine) => {
+    const line = cleanEvidenceLine(rawLine);
+    if (/\bUNAVAILABLE\b/i.test(rawLine)) pendingStatus = 'unavailable';
+    else if (/\bAVAILABLE\b/i.test(rawLine)) pendingStatus = 'available';
+
+    if (line.includes(' — HYROX ')) {
+      if (!offeringHeading) offeringHeading = line;
+      return;
+    }
+    if (/^(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\b/i.test(line)) {
+      dates.push({ date: line, status: pendingStatus });
+      return;
+    }
+    if (/\s+(UNAVAILABLE|AVAILABLE)$/i.test(rawLine)) return;
+    if (!metadata.includes(line)) metadata.push(line);
+  });
+
+  const dateSections = dates.map(({ date, status }, index) => `
+    <section class="${index ? 'mt-4' : 'mt-2'}">
+      <h3 class="border-l-2 border-cyan bg-cyan/[.08] px-2 py-1.5 text-[11px] font-black uppercase tracking-[.12em] text-white">${escapeHtml(date)}</h3>
+      <p class="flex items-center gap-2 border-b border-line/50 px-2 py-2 font-bold ${status === 'available' ? 'text-lime' : 'text-coral'}">
+        <span class="h-2 w-2 rounded-full ${status === 'available' ? 'bg-lime' : 'bg-coral'}"></span>${status === 'available' ? 'Tickets available' : '0 tickets available'}
+      </p>
+    </section>`).join('');
+
+  const metadataSection = metadata.length
+    ? metadata.map((line) => `<p class="mt-1.5 first:mt-0 leading-5 text-slate-200">${escapeHtml(line)}</p>`).join('')
+    : '<p class="text-gray-300">No additional event information recorded.</p>';
+
+  const notesSection = `
+    <section class="mt-4 border-t-2 border-line pt-3">
+      <h3 class="text-[11px] font-black uppercase tracking-[.12em] text-gray-300">Notes</h3>
+      ${offeringHeading ? `<p class="mt-2 font-bold text-white">${escapeHtml(offeringHeading)}</p>` : ''}
+      ${dateSections}
+    </section>`;
+
+  return `${metadataSection}${notesSection}`;
+};
 
 function summaryCard(label, value, note, tone = 'text-white', link = null) {
   return `<article class="bg-panel px-3 py-2.5">
@@ -56,8 +104,8 @@ function showDetail(category, observation) {
       </span>
       <time class="text-[11px] font-bold uppercase tracking-wider text-gray-300">${formatTime(observation.checked_at)}</time>
     </div>
-    <p class="mb-1 text-[11px] font-bold uppercase tracking-[.16em] text-gray-300">Notes</p>
-    <div class="evidence-scroll h-44 overflow-y-scroll border-l-2 border-line pl-3 pr-2 text-xs font-semibold leading-5 text-slate-200" tabindex="0" aria-label="Notes; scroll for full text">${formatEvidence(ticket.evidence)}</div>`;
+    <p class="mb-1 text-[11px] font-bold uppercase tracking-[.16em] text-gray-300">Event information</p>
+    <div class="evidence-scroll h-44 overflow-y-scroll border-l-2 border-line pl-3 pr-2 text-xs font-semibold leading-5 text-slate-200" tabindex="0" aria-label="Notes; scroll for full text">${formatEvidence(ticket.evidence, ticket.status)}</div>`;
 }
 
 function selectCategory(category) {
