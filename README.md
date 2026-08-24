@@ -61,3 +61,15 @@ python monitor.py
 
 Override the source page with `HYROX_TICKET_URL` or `--url` if HYROX changes the
 canonical Vivenu ticket-shop URL.
+
+## Dashboard
+
+The repository includes a static Tailwind dashboard for `state/current.json`. No
+JavaScript framework or build step is required. Run it locally from the repository
+root:
+
+```bash
+python3 -m http.server 8000
+```
+
+Then open `http://localhost:8000/state/tracker.html`.
