@@ -133,6 +133,7 @@
           <div class="flex items-center gap-3 text-[11px] font-semibold text-gray-300">
             <span class="flex items-center gap-1.5"><span class="h-2 w-2 rounded-full bg-lime"></span>Available</span>
             <span class="flex items-center gap-1.5"><span class="h-2 w-2 rounded-full bg-coral"></span>Unavailable</span>
+            <span class="flex items-center gap-1.5"><span class="h-2 w-2 rotate-45 bg-amber-300"></span>Failed check</span>
             <span class="relative">
               <button type="button" data-popover-trigger="status-info" aria-expanded="false" aria-label="About availability states" class="info-orbit grid h-4 w-4 place-items-center rounded-full text-slate-300 transition hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan/60"><span class="info-glyph scale-75" aria-hidden="true"><span class="info-glyph-dot"></span><span class="info-glyph-stem"></span></span></button>
               <span id="status-info" role="tooltip" class="popover pointer-events-none absolute right-0 top-full z-30 mt-2 hidden w-72 border border-line bg-slate-950 p-3 text-left shadow-2xl">
@@ -142,6 +143,8 @@
                   <span class="text-xs font-semibold leading-5 text-slate-200"><strong class="text-lime">Available</strong><br>The check detected tickets for the monitored division. Availability can change between checks.</span>
                   <span class="mt-1.5 h-2.5 w-2.5 rounded-full bg-coral"></span>
                   <span class="text-xs font-semibold leading-5 text-slate-200"><strong class="text-coral">Unavailable</strong><br>The check did not detect available tickets. A later check may record a different state.</span>
+                  <span class="mt-1.5 h-2.5 w-2.5 rotate-45 bg-amber-300"></span>
+                  <span class="text-xs font-semibold leading-5 text-slate-200"><strong class="text-amber-300">Failed check</strong><br>The monitor could not determine availability. Open the linked workflow run for details.</span>
                 </span>
               </span>
             </span>

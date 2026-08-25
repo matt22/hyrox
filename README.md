@@ -30,9 +30,10 @@ retained observations. `total_openings` provides a quick sum of all such opening
 transitions still in the rolling history.
 Unexpected page structures fail the job and upload
 HTML, visible text, a screenshot, and error context as a 14-day diagnostic artifact.
-Every workflow attempt also commits `state/run-status.json`, including failed checks,
+Every workflow attempt also commits `state/run-status.json`, which retains the latest
+16 attempts including failed checks,
 so the dashboard can warn that its availability display is the last known good state
-and link directly to the failed Actions run.
+and represent failures in the history table with links to their Actions runs.
 Routine checks contain no AI calls; Codex can be used separately to inspect failures.
 
 ## Setup

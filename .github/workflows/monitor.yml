@@ -63,7 +63,7 @@ jobs:
           from pathlib import Path
 
           outcome = os.environ.get("MONITOR_OUTCOME", "skipped")
-          payload = {
+          attempt = {
               "status": "success" if outcome == "success" else "failure",
               "monitor_outcome": outcome,
               "recorded_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
@@ -73,6 +73,24 @@ jobs:
           }
           path = Path("state/run-status.json")
           path.parent.mkdir(parents=True, exist_ok=True)
+          previous = json.loads(path.read_text()) if path.exists() else None
+          if previous and "history" in previous:
+              history = previous["history"]
+          elif previous and previous.get("run_id"):
+              history = [previous]
+          else:
+              history = []
+          history = [
+              item for item in history
+              if (item.get("run_id"), item.get("run_attempt"))
+              != (attempt["run_id"], attempt["run_attempt"])
+          ]
+          history.append(attempt)
+          history = history[-16:]
+          payload = {
+              "meta": {"max_attempts": 16, "attempt_count": len(history)},
+              "history": history,
+          }
           path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
           PY
 

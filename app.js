@@ -3,7 +3,8 @@ const state = { data: null };
 function renderRunStatus(runStatus) {
   const badge = document.querySelector('#monitor-status');
   const alert = document.querySelector('#run-alert');
-  if (!runStatus || runStatus.status !== 'failure') {
+  const latestAttempt = runStatus?.history?.at(-1) || runStatus;
+  if (!latestAttempt || latestAttempt.status !== 'failure') {
     alert.classList.add('hidden');
     return;
   }
@@ -11,8 +12,8 @@ function renderRunStatus(runStatus) {
   badge.classList.remove('border-lime/25', 'bg-lime/10', 'text-lime');
   badge.classList.add('border-coral/25', 'bg-coral/10', 'text-coral');
   badge.innerHTML = '<span class="h-1.5 w-1.5 rounded-full bg-coral shadow-[0_0_8px_#ff7d73]"></span>Check failed';
-  document.querySelector('#run-alert-copy').textContent = `Run #${runStatus.run_id} failed ${formatTime(runStatus.recorded_at)}. Availability below is from the last successful check.`;
-  document.querySelector('#run-alert-link').href = runStatus.run_url;
+  document.querySelector('#run-alert-copy').textContent = `Run #${latestAttempt.run_id} failed ${formatTime(latestAttempt.recorded_at)}. Availability below is from the last successful check.`;
+  document.querySelector('#run-alert-link').href = latestAttempt.run_url;
   alert.classList.remove('hidden');
 }
 
@@ -152,17 +153,22 @@ function renderSnapshot(observation, categories, meta) {
   }).join('');
 }
 
-function render(data) {
+function render(data, runStatus) {
   state.data = data;
   const { meta, history } = data;
   const latest = history.at(-1);
-  const displayHistory = [...history].reverse();
+  const failedAttempts = (runStatus?.history || (runStatus?.status === 'failure' ? [runStatus] : []))
+    .filter((attempt) => attempt.status === 'failure');
+  const displayHistory = [
+    ...history.map((observation) => ({ kind: 'availability', time: observation.checked_at, observation })),
+    ...failedAttempts.map((attempt) => ({ kind: 'failure', time: attempt.recorded_at, attempt }))
+  ].sort((a, b) => new Date(b.time) - new Date(a.time));
   const categories = Object.keys(latest.tickets);
   const availableNow = categories.filter((name) => latest.tickets[name].status === 'available').length;
 
   document.querySelector('#last-updated').textContent = `Last Check ${formatTime(latest.checked_at)}`;
   document.querySelector('#event-link').href = latest.source_url;
-  document.querySelector('#range-label').textContent = `${history.length} checks · Newest first · ${formatTime(meta.window_start)}–${formatTime(meta.window_end)}`;
+  document.querySelector('#range-label').textContent = `${displayHistory.length} attempts · Newest first · ${formatTime(displayHistory.at(-1).time)}–${formatTime(displayHistory[0].time)}`;
   document.querySelector('#summary').innerHTML = [
     summaryCard('Available now', `${availableNow}/${categories.length}`, availableNow ? 'Tickets detected' : 'All monitored tickets closed', availableNow ? 'text-lime' : 'text-coral'),
     summaryCard('Ticket openings', meta.total_openings, 'Within retained history', meta.total_openings ? 'text-lime' : 'text-white'),
@@ -171,15 +177,23 @@ function render(data) {
   ].join('');
 
   const matrix = document.querySelector('#matrix');
-  matrix.style.setProperty('--checks', history.length);
-  const timeHeaders = displayHistory.map((observation, index) => `
-    <div class="flex min-h-14 items-end justify-center border-l border-line px-1 pb-2 text-center text-[11px] font-bold text-gray-300 ${index === displayHistory.length - 1 ? 'border-r' : ''}" title="${formatTime(observation.checked_at)}">
-      <span>${index === 0 || formatDay(observation.checked_at) !== formatDay(displayHistory[index - 1].checked_at) ? formatDay(observation.checked_at) + '<br>' : ''}${formatClock(observation.checked_at)}</span>
+  matrix.style.setProperty('--checks', displayHistory.length);
+  const timeHeaders = displayHistory.map((entry, index) => `
+    <div class="flex min-h-14 items-end justify-center border-l border-line px-1 pb-2 text-center text-[11px] font-bold ${entry.kind === 'failure' ? 'bg-amber-300/[.04] text-amber-200' : 'text-gray-300'} ${index === displayHistory.length - 1 ? 'border-r' : ''}" title="${formatTime(entry.time)}${entry.kind === 'failure' ? ' · Failed check' : ''}">
+      <span>${index === 0 || formatDay(entry.time) !== formatDay(displayHistory[index - 1].time) ? formatDay(entry.time) + '<br>' : ''}${formatClock(entry.time)}</span>
     </div>`).join('');
 
   const rows = categories.map((category, categoryIndex) => {
     const alternateRow = categoryIndex % 2 === 1 ? 'bg-white/[.025]' : '';
-    const cells = displayHistory.map((observation, index) => {
+    const cells = displayHistory.map((entry, index) => {
+      if (entry.kind === 'failure') {
+        return `<a href="${entry.attempt.run_url}" target="_blank" rel="noreferrer" data-history-cell class="matrix-cell group relative grid min-h-11 place-items-center border-l border-t border-line bg-amber-300/[.04] transition hover:bg-amber-300/[.09] focus:outline-none focus:ring-2 focus:ring-inset focus:ring-amber-300/70 ${index === displayHistory.length - 1 ? 'border-r' : ''}" aria-label="${category}, failed check, ${formatTime(entry.time)}; view workflow run ${entry.attempt.run_id}">
+          <span class="h-2.5 w-2.5 rotate-45 bg-amber-300 shadow-[0_0_8px_rgba(252,211,77,.45)]"></span>
+          <span aria-hidden="true" class="absolute bottom-0.5 right-1 text-[9px] font-black text-amber-300/60 transition group-hover:text-amber-200">↗</span>
+          <span class="matrix-tip pointer-events-none absolute bottom-full left-1/2 z-20 w-max max-w-48 -translate-x-1/2 bg-slate-950 px-2 py-1 text-[11px] font-semibold text-slate-100 opacity-0 shadow-xl transition">Failed check · View run #${entry.attempt.run_id}</span>
+        </a>`;
+      }
+      const observation = entry.observation;
       const status = observation.tickets[category].status;
       return `<button type="button" data-history-cell data-category="${category}" data-time="${observation.checked_at}" aria-selected="false" class="matrix-cell relative grid min-h-11 place-items-center border-l border-t border-line transition hover:bg-white/[.05] focus:outline-none focus:ring-2 focus:ring-inset focus:ring-cyan/60 ${alternateRow} ${index === displayHistory.length - 1 ? 'border-r' : ''}" aria-label="${category}, ${statusCopy(status)}, ${formatTime(observation.checked_at)}">
         <span class="h-2.5 w-2.5 rounded-full ${status === 'available' ? 'bg-lime shadow-[0_0_8px_rgba(142,234,111,.6)]' : 'bg-coral/80'}"></span>
@@ -226,7 +240,7 @@ Promise.all([
   fetchJson('state/run-status.json').catch(() => null)
 ])
   .then(([data, runStatus]) => {
-    render(data);
+    render(data, runStatus);
     renderRunStatus(runStatus);
   })
   .catch((error) => {
