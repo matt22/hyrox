@@ -189,7 +189,7 @@ function render(data, runStatus) {
       if (entry.kind === 'failure') {
         return `<a href="${entry.attempt.run_url}" target="_blank" rel="noreferrer" data-history-cell class="matrix-cell group relative grid min-h-11 place-items-center border-l border-t border-line bg-amber-300/[.04] transition hover:bg-amber-300/[.09] focus:outline-none focus:ring-2 focus:ring-inset focus:ring-amber-300/70 ${index === displayHistory.length - 1 ? 'border-r' : ''}" aria-label="${category}, failed check, ${formatTime(entry.time)}; view workflow run ${entry.attempt.run_id}">
           <span class="h-2.5 w-2.5 rotate-45 bg-amber-300 shadow-[0_0_8px_rgba(252,211,77,.45)]"></span>
-          <span aria-hidden="true" class="absolute bottom-0.5 right-1 text-[9px] font-black text-amber-300/60 transition group-hover:text-amber-200">↗</span>
+          <span aria-hidden="true" class="absolute bottom-0.5 right-1 text-[8px] font-black uppercase tracking-[.08em] text-amber-300/60 transition group-hover:text-amber-200">Log ↗</span>
           <span class="matrix-tip pointer-events-none absolute bottom-full left-1/2 z-20 w-max max-w-48 -translate-x-1/2 bg-slate-950 px-2 py-1 text-[11px] font-semibold text-slate-100 opacity-0 shadow-xl transition">Failed check · View run #${entry.attempt.run_id}</span>
         </a>`;
       }
