@@ -1,5 +1,21 @@
 const state = { data: null };
 
+function renderRunStatus(runStatus) {
+  const badge = document.querySelector('#monitor-status');
+  const alert = document.querySelector('#run-alert');
+  if (!runStatus || runStatus.status !== 'failure') {
+    alert.classList.add('hidden');
+    return;
+  }
+
+  badge.classList.remove('border-lime/25', 'bg-lime/10', 'text-lime');
+  badge.classList.add('border-coral/25', 'bg-coral/10', 'text-coral');
+  badge.innerHTML = '<span class="h-1.5 w-1.5 rounded-full bg-coral shadow-[0_0_8px_#ff7d73]"></span>Check failed';
+  document.querySelector('#run-alert-copy').textContent = `Run #${runStatus.run_id} failed ${formatTime(runStatus.recorded_at)}. Availability below is from the last successful check.`;
+  document.querySelector('#run-alert-link').href = runStatus.run_url;
+  alert.classList.remove('hidden');
+}
+
 const formatTime = (iso, options = {}) => new Intl.DateTimeFormat('en-US', {
   timeZone: 'America/Los_Angeles',
   month: 'short',
@@ -200,12 +216,19 @@ function render(data) {
   showDetail(categories[0], latest);
 }
 
-fetch('state/current.json', { cache: 'no-store' })
-  .then((response) => {
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    return response.json();
+const fetchJson = (url) => fetch(url, { cache: 'no-store' }).then((response) => {
+  if (!response.ok) throw new Error(`${url}: HTTP ${response.status}`);
+  return response.json();
+});
+
+Promise.all([
+  fetchJson('state/current.json'),
+  fetchJson('state/run-status.json').catch(() => null)
+])
+  .then(([data, runStatus]) => {
+    render(data);
+    renderRunStatus(runStatus);
   })
-  .then(render)
   .catch((error) => {
     document.querySelector('#last-updated').textContent = 'Data unavailable';
     document.querySelector('#summary').innerHTML = `<div class="col-span-full bg-panel p-4 text-sm text-coral">Could not load state/current.json (${error.message}). Serve this repository through a local web server.</div>`;

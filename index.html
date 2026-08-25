@@ -104,6 +104,19 @@
         <span class="absolute right-[30%] top-1/2 -translate-y-1/2" aria-hidden="true">Anaheim</span>
       </div>
 
+      <section id="run-alert" class="mb-3 hidden border border-coral/50 bg-coral/10 px-3 py-2.5" role="status" aria-live="polite">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div class="flex items-start gap-2.5">
+            <span class="mt-1 h-2 w-2 shrink-0 rounded-full bg-coral shadow-[0_0_8px_rgba(255,125,115,.55)]"></span>
+            <div>
+              <p class="text-xs font-black uppercase tracking-[.14em] text-coral">Latest automated check failed</p>
+              <p id="run-alert-copy" class="mt-0.5 text-xs font-semibold text-slate-200">Availability below is from the last successful check.</p>
+            </div>
+          </div>
+          <a id="run-alert-link" href="#" target="_blank" rel="noreferrer" class="border border-coral/40 bg-slate-950/40 px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-[.1em] text-coral transition hover:border-coral hover:text-white focus:outline-none focus:ring-2 focus:ring-coral/60">View failed run ↗</a>
+        </div>
+      </section>
+
       <section class="mb-3 overflow-hidden border border-line shadow-glow" aria-labelledby="overview-heading">
         <div class="border-b border-line bg-panel/80 px-3 py-2">
           <h2 id="overview-heading" class="text-xs font-bold uppercase tracking-[.14em] text-slate-200">Monitor overview</h2>

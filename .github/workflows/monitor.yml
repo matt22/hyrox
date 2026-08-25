@@ -48,6 +48,34 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
+      - name: Record check status
+        if: always()
+        env:
+          MONITOR_OUTCOME: ${{ steps.monitor.outcome }}
+          RUN_ID: ${{ github.run_id }}
+          RUN_ATTEMPT: ${{ github.run_attempt }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          outcome = os.environ.get("MONITOR_OUTCOME", "skipped")
+          payload = {
+              "status": "success" if outcome == "success" else "failure",
+              "monitor_outcome": outcome,
+              "recorded_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
+              "run_id": int(os.environ["RUN_ID"]),
+              "run_attempt": int(os.environ["RUN_ATTEMPT"]),
+              "run_url": os.environ["RUN_URL"],
+          }
+          path = Path("state/run-status.json")
+          path.parent.mkdir(parents=True, exist_ok=True)
+          path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+          PY
+
       - name: Render GitHub notification
         if: >-
           steps.monitor.outputs.changed == 'true' ||
@@ -74,11 +102,11 @@ jobs:
       # Notify first: if issue delivery ever fails, the old state remains and
       # the next scheduled run retries the alert instead of silently losing it.
       - name: Persist rolling state
-        if: success()
+        if: always()
         run: |
-          if git diff --quiet -- state/current.json; then exit 0; fi
+          if git diff --quiet -- state/current.json state/run-status.json; then exit 0; fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -f state/current.json
-          git commit -m "chore: update ticket availability state [skip ci]"
+          git add -f state/current.json state/run-status.json
+          git commit -m "chore: update ticket monitor state [skip ci]"
           git push
