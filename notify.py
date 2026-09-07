@@ -25,7 +25,15 @@ def notification_users(raw: str) -> list[str]:
 
 def render_markdown(state: dict, changes: list[str], users: list[str]) -> str:
     mentions = " ".join(f"@{user}" for user in users)
-    if changes:
+    openings = [change for change in changes if change.endswith("-> available")]
+    if openings:
+        heading = "## 🟢 TICKETS AVAILABLE"
+        callout = (
+            "> [!IMPORTANT]\n"
+            "> 🟢 **Tickets are available now — act quickly.**<br>\n> "
+            + "<br>\n> ".join(openings)
+        )
+    elif changes:
         heading = "## Availability changed"
         callout = "> [!IMPORTANT]\n> " + "<br>\n> ".join(changes)
     else:

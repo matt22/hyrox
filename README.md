@@ -46,7 +46,10 @@ Routine checks contain no AI calls; Codex can be used separately to inspect fail
 4. Run **HYROX Anaheim availability** manually once to establish the baseline.
 
 Notifications use restrained GitHub-Flavored Markdown: a clear callout, compact status
-table, official event link, and timestamp. GitHub controls the surrounding email UI.
+table, official event link, and timestamp. An availability opening is headed
+`🟢 TICKETS AVAILABLE` and begins with a green attention marker. The persistent issue
+is titled `🟢 HYROX Anaheim ticket monitor`, so GitHub's notification-email subject
+also carries the green-circle icon. GitHub controls the remaining email UI.
 
 To mention more accounts later, add a repository variable named `HYROX_NOTIFY_USERS`
 containing comma-separated GitHub usernames and expose it to the render step. The

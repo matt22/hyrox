@@ -134,7 +134,8 @@ def test_github_notification_template():
     }
     rendered = render_markdown(state, ["Mixed Open Relay: unavailable -> available"], ["matt22"])
     assert rendered.startswith("@matt22")
-    assert "## Availability changed" in rendered
+    assert "## 🟢 TICKETS AVAILABLE" in rendered
+    assert "🟢 **Tickets are available now — act quickly.**" in rendered
     assert "✅ **AVAILABLE**" in rendered
     assert "https://example.com/?a=1&b=2" in rendered
 

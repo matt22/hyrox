@@ -110,11 +110,12 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          issue_number="$(gh issue list --state open --search 'HYROX Anaheim ticket monitor in:title' --json number,title --jq '.[] | select(.title == "HYROX Anaheim ticket monitor") | .number' | head -1)"
+          issue_number="$(gh issue list --state open --search 'HYROX Anaheim ticket monitor in:title' --json number,title --jq '.[] | select(.title == "🟢 HYROX Anaheim ticket monitor" or .title == "HYROX Anaheim ticket monitor") | .number' | head -1)"
           if [ -n "$issue_number" ]; then
+            gh issue edit "$issue_number" --title "🟢 HYROX Anaheim ticket monitor"
             gh issue comment "$issue_number" --body-file notification.md
           else
-            gh issue create --title "HYROX Anaheim ticket monitor" --body-file notification.md
+            gh issue create --title "🟢 HYROX Anaheim ticket monitor" --body-file notification.md
           fi
 
       # Notify first: if issue delivery ever fails, the old state remains and
