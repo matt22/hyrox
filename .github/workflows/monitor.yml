@@ -3,8 +3,9 @@ name: HYROX Anaheim availability
 on:
   workflow_dispatch:
   schedule:
-    # Hourly observations provide a complete two-day dashboard history.
-    - cron: "5 * * * *"
+    # Eight observations per day: midnight, 1 AM, and hourly 7 AM–noon Pacific
+    # during daylight time. The UTC cadence shifts by an hour in standard time.
+    - cron: "5 7,8,14-19 * * *"
 
 permissions:
   contents: write
