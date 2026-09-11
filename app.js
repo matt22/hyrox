@@ -38,17 +38,6 @@ const formatDay = (iso) => new Intl.DateTimeFormat('en-US', {
   day: 'numeric'
 }).format(new Date(iso));
 
-const pacificDayKey = (value) => {
-  const parts = new Intl.DateTimeFormat('en-US', {
-    timeZone: 'America/Los_Angeles',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit'
-  }).formatToParts(new Date(value));
-  const values = Object.fromEntries(parts.map(({ type, value: part }) => [type, part]));
-  return `${values.year}-${values.month}-${values.day}`;
-};
-
 const statusCopy = (status) => status === 'available' ? 'Available' : 'Unavailable';
 const ticketCountCopy = (status) => status === 'available' ? 'Tickets Available' : '0 Tickets Available';
 
@@ -170,32 +159,20 @@ function render(data, runStatus) {
   const latest = history.at(-1);
   const failedAttempts = (runStatus?.history || (runStatus?.status === 'failure' ? [runStatus] : []))
     .filter((attempt) => attempt.status === 'failure');
-  const allHistory = [
+  const displayHistory = [
     ...history.map((observation) => ({ kind: 'availability', time: observation.checked_at, observation })),
     ...failedAttempts.map((attempt) => ({ kind: 'failure', time: attempt.recorded_at, attempt }))
-  ];
-  const today = pacificDayKey(new Date());
-  const completedDays = [...new Set(allHistory.map((entry) => pacificDayKey(entry.time)))]
-    .filter((day) => day < today)
-    .sort()
-    .slice(-2);
-  // On the monitor's first day, show its available data rather than an empty chart.
-  const displayDays = completedDays.length
-    ? new Set(completedDays)
-    : new Set([...new Set(allHistory.map((entry) => pacificDayKey(entry.time)))].sort().slice(-2));
-  const displayHistory = allHistory
-    .filter((entry) => displayDays.has(pacificDayKey(entry.time)))
-    .sort((a, b) => new Date(b.time) - new Date(a.time));
+  ].sort((a, b) => new Date(b.time) - new Date(a.time));
   const categories = Object.keys(latest.tickets);
   const availableNow = categories.filter((name) => latest.tickets[name].status === 'available').length;
 
   document.querySelector('#last-updated').textContent = `Last Check ${formatTime(latest.checked_at)}`;
   document.querySelector('#event-link').href = latest.source_url;
-  document.querySelector('#range-label').textContent = `${displayHistory.length} checks · Last two complete Pacific days · ${formatTime(displayHistory.at(-1).time)}–${formatTime(displayHistory[0].time)}`;
+  document.querySelector('#range-label').textContent = `${displayHistory.length} attempts · Newest first · ${formatTime(displayHistory.at(-1).time)}–${formatTime(displayHistory[0].time)}`;
   document.querySelector('#summary').innerHTML = [
     summaryCard('Available now', `${availableNow}/${categories.length}`, availableNow ? 'Tickets detected' : 'All monitored tickets closed', availableNow ? 'text-lime' : 'text-coral'),
     summaryCard('Ticket openings', meta.total_openings, 'Within retained history', meta.total_openings ? 'text-lime' : 'text-white'),
-    summaryCard('Checks shown', displayHistory.length, 'Last two complete Pacific days', 'text-cyan', { href: 'https://github.com/matt22/hyrox/blob/main/state/current.json', label: 'Data Log ↗' }),
+    summaryCard('Checks logged', meta.observation_count, `${meta.retention_days}-day rolling window`, 'text-cyan', { href: 'https://github.com/matt22/hyrox/blob/main/state/current.json', label: 'Data Log ↗' }),
     summaryCard('Divisions tracked', categories.length, 'Selected event categories', 'text-white')
   ].join('');
 

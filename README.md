@@ -22,11 +22,10 @@ The first successful run establishes a baseline. Later status changes post immed
 to one persistent GitHub issue and explicitly mention the repository owner, which
 triggers GitHub's normal email notification. When there is no change, a status comment
 is posted once at the end of each requested block: 1:05 AM and 12:05 PM Pacific.
-Every successful check is committed to `state/current.json`, which retains the two
-most recently completed Pacific calendar days plus the current partial day. The
-dashboard displays only the two completed days, so every successful check in each
-displayed day remains visible. Successful manual checks count toward the same
-calendar window; failed runs do not produce observations. Its metadata reports, per ticket category, both the number of
+Every successful check is committed to `state/current.json`, which retains the latest
+16 observations: eight checks per day for two days. The dashboard renders that full
+rolling history. Successful manual checks count toward the same cap; failed runs do
+not produce observations. Its metadata reports, per ticket category, both the number of
 available observations and the number of transitions into availability during the
 retained observations. `total_openings` provides a quick sum of all such opening
 transitions still in the rolling history.

@@ -9,7 +9,7 @@ import os
 import re
 import sys
 from dataclasses import asdict, dataclass
-from datetime import date, datetime, timedelta, timezone
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterable
 from urllib.parse import urljoin
@@ -20,6 +20,7 @@ from playwright.sync_api import Page, TimeoutError as PlaywrightTimeoutError, sy
 
 EVENT_URL = "https://usa.hyrox.com/events/hyrox-anaheim-season-26-27-edyxxn"
 PACIFIC = ZoneInfo("America/Los_Angeles")
+CHECKS_PER_DAY = 8
 HISTORY_DAYS = 2
 
 # Keep this list deliberately narrow. Matching happens after excluded ticket types
@@ -250,18 +251,13 @@ def latest_observation(state: dict) -> dict:
     return history[-1] if history else state
 
 
-def pacific_observation_day(observation: dict) -> date:
-    """Return the observation's calendar date in the dashboard's time zone."""
-    checked_at = observation["checked_at"].replace("Z", "+00:00")
-    return datetime.fromisoformat(checked_at).astimezone(PACIFIC).date()
+def requested_history_limit() -> int:
+    """Retain eight successful checks for each displayed day."""
+    return CHECKS_PER_DAY * HISTORY_DAYS
 
 
 def rolling_state(previous: dict | None, current: dict) -> dict:
-    """Append a successful observation and retain two completed Pacific days.
-
-    The current Pacific day stays in state until it is complete, so the dashboard
-    can always render the preceding two full days without dropping their checks.
-    """
+    """Append a successful observation and retain the displayed check window."""
     history = list(previous.get("history", [])) if previous else []
     if previous and not history and previous.get("checked_at"):
         # One-time migration from the original latest-observation-only schema.
@@ -277,9 +273,7 @@ def rolling_state(previous: dict | None, current: dict) -> dict:
     ]
     observation = {**current, "opened": opened}
     history.append(observation)
-    current_day = pacific_observation_day(observation)
-    earliest_day = current_day - timedelta(days=HISTORY_DAYS)
-    history = [item for item in history if pacific_observation_day(item) >= earliest_day]
+    history = history[-requested_history_limit():]
     openings = {
         name: {
             "available_observations": sum(
@@ -294,6 +288,7 @@ def rolling_state(previous: dict | None, current: dict) -> dict:
         "meta": {
             "total_openings": sum(len(item.get("opened", [])) for item in history),
             "retention_days": HISTORY_DAYS,
+            "max_observations": requested_history_limit(),
             "observation_count": len(history),
             "window_start": history[0]["checked_at"],
             "window_end": history[-1]["checked_at"],
