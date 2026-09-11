@@ -3,8 +3,8 @@ name: HYROX Anaheim availability
 on:
   workflow_dispatch:
   schedule:
-    # Both PDT and PST UTC windows. The script's Pacific-time guard removes
-    # the extra DST-overlap invocations.
+    # Both PDT and PST UTC windows. Run each candidate rather than dropping
+    # delayed jobs whose actual start time falls outside its intended window.
     - cron: "5 7-9,14-20 * * *"
 
 permissions:
@@ -35,9 +35,7 @@ jobs:
 
       - name: Check availability
         id: monitor
-        run: >-
-          python monitor.py
-          ${{ github.event_name == 'schedule' && '--schedule-guard' || '' }}
+        run: python monitor.py
 
       - name: Upload diagnostics
         if: failure()

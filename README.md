@@ -12,19 +12,20 @@ Charity, Adaptive, Pro, Spectator, and Youngstars tickets are explicitly exclude
 
 ## How it works
 
-GitHub Actions checks at **12:05 AM, 1:05 AM, and hourly from 7:05 AM through
-12:05 PM Pacific time**. The workflow includes both UTC offsets and a Pacific-time
-guard, so daylight-saving changes do not shift the requested local schedule.
+GitHub Actions runs every configured UTC window covering the intended early-morning
+and daytime Pacific periods. Both daylight-saving offsets are included, and delayed
+jobs are still allowed to collect availability rather than being discarded by a
+start-time guard.
 
 The first successful run establishes a baseline. Later status changes post immediately
 to one persistent GitHub issue and explicitly mention the repository owner, which
 triggers GitHub's normal email notification. When there is no change, a status comment
 is posted once at the end of each requested block: 1:05 AM and 12:05 PM Pacific.
-Every successful check is committed to `state/current.json`, which retains the latest
-two days' requested observations. The cap is derived from the configured Pacific run
-hours (currently 8 per day, or 16 observations) rather than hardcoded. Successful
-manual checks count toward the same cap; failed and schedule-guard-skipped runs do not
-produce observations. Its metadata reports, per ticket category, both the number of
+Every successful check is committed to `state/current.json`, which retains the two
+most recently completed Pacific calendar days plus the current partial day. The
+dashboard displays only the two completed days, so every successful check in each
+displayed day remains visible. Successful manual checks count toward the same
+calendar window; failed runs do not produce observations. Its metadata reports, per ticket category, both the number of
 available observations and the number of transitions into availability during the
 retained observations. `total_openings` provides a quick sum of all such opening
 transitions still in the rolling history.
