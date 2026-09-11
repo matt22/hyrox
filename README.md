@@ -12,10 +12,9 @@ Charity, Adaptive, Pro, Spectator, and Youngstars tickets are explicitly exclude
 
 ## How it works
 
-GitHub Actions runs every configured UTC window covering the intended early-morning
-and daytime Pacific periods. Both daylight-saving offsets are included, and delayed
-jobs are still allowed to collect availability rather than being discarded by a
-start-time guard.
+GitHub Actions checks once per hour, at five minutes past the hour. Delayed jobs are
+still allowed to collect availability rather than being discarded by a start-time
+guard.
 
 The first successful run establishes a baseline. Later status changes post immediately
 to one persistent GitHub issue and explicitly mention the repository owner, which

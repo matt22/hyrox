@@ -3,9 +3,8 @@ name: HYROX Anaheim availability
 on:
   workflow_dispatch:
   schedule:
-    # Both PDT and PST UTC windows. Run each candidate rather than dropping
-    # delayed jobs whose actual start time falls outside its intended window.
-    - cron: "5 7-9,14-20 * * *"
+    # Hourly observations provide a complete two-day dashboard history.
+    - cron: "5 * * * *"
 
 permissions:
   contents: write
@@ -84,9 +83,11 @@ jobs:
               != (attempt["run_id"], attempt["run_attempt"])
           ]
           history.append(attempt)
-          history = history[-16:]
+          # Keep the current Pacific day plus the two completed days: 72 hourly
+          # attempts, enough for every failure marker in the dashboard window.
+          history = history[-72:]
           payload = {
-              "meta": {"max_attempts": 16, "attempt_count": len(history)},
+              "meta": {"max_attempts": 72, "attempt_count": len(history)},
               "history": history,
           }
           path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
