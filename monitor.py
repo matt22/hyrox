@@ -20,7 +20,7 @@ from playwright.sync_api import Page, TimeoutError as PlaywrightTimeoutError, sy
 
 EVENT_URL = "https://usa.hyrox.com/events/hyrox-anaheim-season-26-27-edyxxn"
 PACIFIC = ZoneInfo("America/Los_Angeles")
-RUN_HOURS = {0, 1, 7, 8, 9, 10, 11, 12}
+RUN_HOURS = {1, 6, 7, 8, 9, 10, 11, 12}
 HISTORY_DAYS = 2
 
 # Keep this list deliberately narrow. Matching happens after excluded ticket types
