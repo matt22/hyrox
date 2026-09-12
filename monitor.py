@@ -21,6 +21,7 @@ from playwright.sync_api import Page, TimeoutError as PlaywrightTimeoutError, sy
 EVENT_URL = "https://usa.hyrox.com/events/hyrox-anaheim-season-26-27-edyxxn"
 PACIFIC = ZoneInfo("America/Los_Angeles")
 RUN_HOURS = {1, 6, 7, 8, 9, 10, 11, 12}
+CHECKS_PER_DAY = len(RUN_HOURS)
 HISTORY_DAYS = 2
 
 # Keep this list deliberately narrow. Matching happens after excluded ticket types
@@ -318,8 +319,8 @@ def main() -> int:
     parser.add_argument("--state", type=Path, default=Path("state/current.json"))
     parser.add_argument("--snapshot", type=Path, default=Path("state/latest.json"))
     parser.add_argument("--diagnostics", type=Path, default=Path("diagnostics"))
-        parser.add_argument("--schedule-guard", action="store_true")
-parser.add_argument("--headed", action="store_true")
+    parser.add_argument("--schedule-guard", action="store_true")
+    parser.add_argument("--headed", action="store_true")
     args = parser.parse_args()
 
     if args.schedule_guard and not scheduled_now():
