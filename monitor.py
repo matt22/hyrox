@@ -20,7 +20,7 @@ from playwright.sync_api import Page, TimeoutError as PlaywrightTimeoutError, sy
 
 EVENT_URL = "https://usa.hyrox.com/events/hyrox-anaheim-season-26-27-edyxxn"
 PACIFIC = ZoneInfo("America/Los_Angeles")
-CHECKS_PER_DAY = 8
+RUN_HOURS = {0, 1, 7, 8, 9, 10, 11, 12}
 HISTORY_DAYS = 2
 
 # Keep this list deliberately narrow. Matching happens after excluded ticket types
@@ -252,12 +252,15 @@ def latest_observation(state: dict) -> dict:
 
 
 def requested_history_limit() -> int:
-    """Retain eight successful checks for each displayed day."""
-    return CHECKS_PER_DAY * HISTORY_DAYS
+    """Derive retention from the requested daily Pacific run hours."""
+    return len(RUN_HOURS) * HISTORY_DAYS
 
 
-def rolling_state(previous: dict | None, current: dict) -> dict:
-    """Append a successful observation and retain the displayed check window."""
+def rolling_state(previous: dict | None, current: dict, limit: int | None = None) -> dict:
+    """Append a successful observation and retain the requested history size."""
+    limit = requested_history_limit() if limit is None else limit
+    if limit < 1:
+        raise ValueError("Rolling history limit must be positive")
     history = list(previous.get("history", [])) if previous else []
     if previous and not history and previous.get("checked_at"):
         # One-time migration from the original latest-observation-only schema.
@@ -273,7 +276,7 @@ def rolling_state(previous: dict | None, current: dict) -> dict:
     ]
     observation = {**current, "opened": opened}
     history.append(observation)
-    history = history[-requested_history_limit():]
+    history = history[-limit:]
     openings = {
         name: {
             "available_observations": sum(
@@ -298,6 +301,11 @@ def rolling_state(previous: dict | None, current: dict) -> dict:
     }
 
 
+def scheduled_now(now: datetime | None = None) -> bool:
+    local = (now or datetime.now(timezone.utc)).astimezone(PACIFIC)
+    return local.hour in RUN_HOURS
+
+
 def block_summary_due(now: datetime | None = None) -> bool:
     """Send one heartbeat at the final check in each requested time block."""
     local = (now or datetime.now(timezone.utc)).astimezone(PACIFIC)
@@ -310,8 +318,13 @@ def main() -> int:
     parser.add_argument("--state", type=Path, default=Path("state/current.json"))
     parser.add_argument("--snapshot", type=Path, default=Path("state/latest.json"))
     parser.add_argument("--diagnostics", type=Path, default=Path("diagnostics"))
-    parser.add_argument("--headed", action="store_true")
+        parser.add_argument("--schedule-guard", action="store_true")
+parser.add_argument("--headed", action="store_true")
     args = parser.parse_args()
+
+    if args.schedule_guard and not scheduled_now():
+        print("Outside configured Pacific run hours; exiting without checking.")
+        return 0
 
     try:
         tickets = check(args.url, args.diagnostics, not args.headed)
