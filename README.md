@@ -12,27 +12,45 @@ Charity, Adaptive, Pro, Spectator, and Youngstars tickets are explicitly exclude
 
 ## How it works
 
-GitHub Actions checks eight times daily, at five minutes past the hour: midnight,
-1 AM, and hourly from 7 AM through noon Pacific during daylight time. The fixed UTC
-cadence shifts by an hour in standard time, but still records eight daily observations.
-Delayed jobs are allowed to collect availability rather than being discarded by a
-start-time guard.
+The monitor attempts one check in each of eight Pacific hours: 1 AM, and hourly from
+6 AM through noon. That is a ceiling, not a target — the workflow never runs more than
+eight times a day.
+
+The workflow has no cron of its own. GitHub delivers `schedule` events on a best-effort
+basis — this repo was receiving roughly a quarter of them, 30-60 minutes late — so
+holding to eight runs a day through GitHub's scheduler is not possible: covering every
+Pacific hour would mean requesting far more arrivals than needed and turning most away,
+each one a run on the Actions log. The trigger is the Cloudflare Worker in
+[`cloudflare/`](cloudflare/) instead. It ticks every ten minutes and dispatches the
+workflow only for a Pacific hour that has neither an observation nor a logged attempt.
+
+`schedule.py` applies the same two rules again when the run starts, before anything is
+installed, so the ceiling holds no matter what does the dispatching — including a
+repeated manual dispatch. An hour is spent as soon as an attempt is logged for it: a
+failed check is written to `state/run-status.json` and shown on the dashboard as a
+failure marker rather than retried.
+
+`RUN_HOURS` in `schedule.py` is the only definition of the schedule. Because the guard
+reads the wall clock in `America/Los_Angeles`, the cadence needs no adjustment across
+daylight saving; the earlier fixed-UTC cron silently lost an hour every summer.
 
 The first successful run establishes a baseline. Later status changes post immediately
 to one persistent GitHub issue and explicitly mention the repository owner, which
 triggers GitHub's normal email notification. When there is no change, a status comment
-is posted once at the end of each requested block: 1:05 AM and 12:05 PM Pacific.
+is posted once at the end of each requested block: the 1 AM and noon Pacific checks.
 Every successful check is committed to `state/current.json`, which retains the latest
 16 observations: eight checks per day for two days. The dashboard renders that full
-rolling history. Successful manual checks count toward the same cap; failed runs do
-not produce observations. Its metadata reports, per ticket category, both the number of
-available observations and the number of transitions into availability during the
-retained observations. `total_openings` provides a quick sum of all such opening
-transitions still in the rolling history.
+rolling history and labels it with the rate actually achieved, so a day that ran short
+shows as such instead of being presented as a full window. Successful manual checks
+count toward the same cap; failed runs do not produce observations. Its metadata
+reports, per ticket category, both the number of available observations and the
+number of transitions into availability during the retained observations.
+`total_openings` provides a quick sum of all such opening transitions still in the
+rolling history.
 Unexpected page structures fail the job and upload
 HTML, visible text, a screenshot, and error context as a 14-day diagnostic artifact.
-Every workflow attempt also commits `state/run-status.json`, which retains the latest
-16 attempts including failed checks,
+Every attempt also commits `state/run-status.json`, which retains the latest
+24 of them, failures included,
 so the dashboard can warn that its availability display is the last known good state
 and represent failures in the history table with links to their Actions runs.
 Routine checks contain no AI calls; Codex can be used separately to inspect failures.

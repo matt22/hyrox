@@ -1,11 +1,18 @@
 name: HYROX Anaheim availability
 
+# No `schedule:` trigger. GitHub's cron cannot hold to eight runs a day: it
+# delivers slots late and unpredictably, so covering every Pacific hour means
+# asking for far more arrivals than needed and turning most away — runs on the
+# Actions log either way. The Cloudflare Worker in cloudflare/ dispatches this
+# workflow once per Pacific run hour instead, and schedule.py enforces that
+# ceiling independently of whatever does the dispatching.
 on:
   workflow_dispatch:
-  schedule:
-    # Both PDT and PST UTC windows. The script's Pacific-time guard removes
-    # the extra DST-overlap invocations.
-    - cron: "5 7-9,14-20 * * *"
+    inputs:
+      force:
+        description: Check now even if this Pacific hour is already recorded
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -24,23 +31,35 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - uses: actions/setup-python@v7
+      # Runs before any install so a slot we are going to skip costs seconds.
+      - name: Is this hour's check due?
+        id: guard
+        run: |
+          # pipefail so a broken guard fails loudly instead of leaving `due`
+          # unset, which would silently skip every check from then on.
+          set -o pipefail
+          python3 schedule.py ${{ inputs.force && '--force' || '' }} | tee -a "$GITHUB_OUTPUT"
+
+      - if: steps.guard.outputs.due == 'true'
+        uses: actions/setup-python@v7
         with:
           python-version: "3.12"
           cache: pip
 
-      - run: pip install -r requirements.txt
-      - run: playwright install --with-deps chromium
-      - run: pytest -q
+      - if: steps.guard.outputs.due == 'true'
+        run: pip install -r requirements.txt
+      - if: steps.guard.outputs.due == 'true'
+        run: pytest -q
+      - if: steps.guard.outputs.due == 'true'
+        run: playwright install --with-deps chromium
 
       - name: Check availability
         id: monitor
-        run: >-
-          python monitor.py
-          ${{ github.event_name == 'schedule' && '--schedule-guard' || '' }}
+        if: steps.guard.outputs.due == 'true'
+        run: python monitor.py
 
       - name: Upload diagnostics
-        if: failure()
+        if: failure() && steps.guard.outputs.due == 'true'
         uses: actions/upload-artifact@v7
         with:
           name: hyrox-diagnostics-${{ github.run_id }}
@@ -49,14 +68,14 @@ jobs:
           retention-days: 14
 
       - name: Record check status
-        if: always()
+        if: always() && (steps.guard.outputs.due == 'true' || steps.guard.outcome == 'failure')
         env:
           MONITOR_OUTCOME: ${{ steps.monitor.outcome }}
           RUN_ID: ${{ github.run_id }}
           RUN_ATTEMPT: ${{ github.run_attempt }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          python - <<'PY'
+          python3 - <<'PY'
           import json
           import os
           from datetime import datetime, timezone
@@ -86,11 +105,14 @@ jobs:
               != (attempt["run_id"], attempt["run_attempt"])
           ]
           history.append(attempt)
-          # Keep the current Pacific day plus the two completed days: 72 hourly
-          # attempts, enough for every failure marker in the dashboard window.
-          history = history[-72:]
+          # Only due slots are recorded, so this tracks the dashboard window plus
+          # a spare day of failure markers. Deliberately not imported from
+          # schedule.py: this step must still log when the guard failed because
+          # schedule.py itself is broken. A test keeps the two in step.
+          limit = 24  # CHECKS_PER_DAY * (HISTORY_DAYS + 1)
+          history = history[-limit:]
           payload = {
-              "meta": {"max_attempts": 72, "attempt_count": len(history)},
+              "meta": {"max_attempts": limit, "attempt_count": len(history)},
               "history": history,
           }
           path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
@@ -123,11 +145,13 @@ jobs:
       # Notify first: if issue delivery ever fails, the old state remains and
       # the next scheduled run retries the alert instead of silently losing it.
       - name: Persist rolling state
-        if: always()
+        if: always() && (steps.guard.outputs.due == 'true' || steps.guard.outcome == 'failure')
         run: |
           if git diff --quiet -- state/current.json state/run-status.json; then exit 0; fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -f state/current.json state/run-status.json
           git commit -m "chore: update ticket monitor state [skip ci]"
-          git push
+          # Another push can land while Playwright is driving the ticket shop.
+          git pull --rebase --autostash origin "$GITHUB_REF_NAME"
+          git push origin "HEAD:$GITHUB_REF_NAME"

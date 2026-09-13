@@ -13,16 +13,13 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterable
 from urllib.parse import urljoin
-from zoneinfo import ZoneInfo
 
 from playwright.sync_api import Page, TimeoutError as PlaywrightTimeoutError, sync_playwright
 
+from schedule import CHECKS_PER_DAY, HISTORY_DAYS, block_summary_due, due, load_state
+
 
 EVENT_URL = "https://usa.hyrox.com/events/hyrox-anaheim-season-26-27-edyxxn"
-PACIFIC = ZoneInfo("America/Los_Angeles")
-RUN_HOURS = {1, 6, 7, 8, 9, 10, 11, 12}
-CHECKS_PER_DAY = len(RUN_HOURS)
-HISTORY_DAYS = 2
 
 # Keep this list deliberately narrow. Matching happens after excluded ticket types
 # are rejected, so Charity/Adaptive/Pro/Spectator variants never leak in.
@@ -254,7 +251,7 @@ def latest_observation(state: dict) -> dict:
 
 def requested_history_limit() -> int:
     """Derive retention from the requested daily Pacific run hours."""
-    return len(RUN_HOURS) * HISTORY_DAYS
+    return CHECKS_PER_DAY * HISTORY_DAYS
 
 
 def rolling_state(previous: dict | None, current: dict, limit: int | None = None) -> dict:
@@ -302,30 +299,22 @@ def rolling_state(previous: dict | None, current: dict, limit: int | None = None
     }
 
 
-def scheduled_now(now: datetime | None = None) -> bool:
-    local = (now or datetime.now(timezone.utc)).astimezone(PACIFIC)
-    return local.hour in RUN_HOURS
-
-
-def block_summary_due(now: datetime | None = None) -> bool:
-    """Send one heartbeat at the final check in each requested time block."""
-    local = (now or datetime.now(timezone.utc)).astimezone(PACIFIC)
-    return local.hour in {1, 12}
-
-
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--url", default=os.getenv("HYROX_TICKET_URL", EVENT_URL))
     parser.add_argument("--state", type=Path, default=Path("state/current.json"))
+    parser.add_argument("--runs", type=Path, default=Path("state/run-status.json"))
     parser.add_argument("--snapshot", type=Path, default=Path("state/latest.json"))
     parser.add_argument("--diagnostics", type=Path, default=Path("diagnostics"))
     parser.add_argument("--schedule-guard", action="store_true")
     parser.add_argument("--headed", action="store_true")
     args = parser.parse_args()
 
-    if args.schedule_guard and not scheduled_now():
-        print("Outside configured Pacific run hours; exiting without checking.")
-        return 0
+    if args.schedule_guard:
+        should_run, reason = due(load_state(args.state), runs=load_state(args.runs))
+        if not should_run:
+            print(f"Skipping check: {reason}.")
+            return 0
 
     try:
         tickets = check(args.url, args.diagnostics, not args.headed)

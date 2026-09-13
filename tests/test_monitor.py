@@ -3,10 +3,10 @@ from datetime import datetime, timezone
 import pytest
 
 from monitor import (
-    CHECKS_PER_DAY, HISTORY_DAYS, StructureError, block_summary_due, changes,
-    parse_ticket_texts, requested_history_limit, rolling_state,
+    StructureError, changes, parse_ticket_texts, requested_history_limit, rolling_state,
 )
 from notify import notification_users, render_markdown
+from schedule import CHECKS_PER_DAY, HISTORY_DAYS, block_summary_due
 
 
 BLOCKS = [

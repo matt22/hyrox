@@ -1,0 +1,10 @@
+name = "hyrox-monitor-trigger"
+main = "worker.js"
+compatibility_date = "2026-09-13"
+
+# Every ten minutes: 144 invocations a day against a 100,000/day free-plan
+# allowance, and one of five free cron triggers. Only the ticks inside a
+# Pacific run hour spend a subrequest, and only the first one in each such
+# hour dispatches the workflow — so GitHub still sees about eight runs a day.
+[triggers]
+crons = ["*/10 * * * *"]

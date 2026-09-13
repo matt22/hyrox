@@ -153,6 +153,15 @@ function renderSnapshot(observation, categories, meta) {
   }).join('');
 }
 
+// Report the rate actually achieved, not the rate the retention limit assumes:
+// a thin day of checks has to be visible here rather than read as a full window.
+function checkRateCopy(history) {
+  const days = new Set(history.map((observation) => formatDay(observation.checked_at))).size;
+  if (!days) return 'No checks recorded';
+  const perDay = history.length / days;
+  return `${days} day${days === 1 ? '' : 's'} · ${perDay.toFixed(perDay % 1 ? 1 : 0)}/day`;
+}
+
 function render(data, runStatus) {
   state.data = data;
   const { meta, history } = data;
@@ -172,7 +181,7 @@ function render(data, runStatus) {
   document.querySelector('#summary').innerHTML = [
     summaryCard('Available now', `${availableNow}/${categories.length}`, availableNow ? 'Tickets detected' : 'All monitored tickets closed', availableNow ? 'text-lime' : 'text-coral'),
     summaryCard('Ticket openings', meta.total_openings, 'Within retained history', meta.total_openings ? 'text-lime' : 'text-white'),
-    summaryCard('Checks logged', meta.observation_count, `${meta.retention_days}-day rolling window`, 'text-cyan', { href: 'https://github.com/matt22/hyrox/blob/main/state/current.json', label: 'Data Log ↗' }),
+    summaryCard('Checks logged', meta.observation_count, checkRateCopy(history), 'text-cyan', { href: 'https://github.com/matt22/hyrox/blob/main/state/current.json', label: 'Data Log ↗' }),
     summaryCard('Divisions tracked', categories.length, 'Selected event categories', 'text-white')
   ].join('');
 
