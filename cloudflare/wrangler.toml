@@ -2,6 +2,11 @@ name = "hyrox-monitor-trigger"
 main = "worker.js"
 compatibility_date = "2026-09-13"
 
+# This Worker exports only `scheduled`, so a public URL would serve nothing but
+# an error. Turn both off rather than leave an unused endpoint on the account.
+workers_dev = false
+preview_urls = false
+
 # Every ten minutes: 144 invocations a day against a 100,000/day free-plan
 # allowance, and one of five free cron triggers. Only ticks inside a Pacific run
 # hour spend a subrequest, and an hour is dispatched only if it has neither an
