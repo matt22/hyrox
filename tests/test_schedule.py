@@ -14,9 +14,10 @@ from schedule import (
 ROOT = Path(__file__).resolve().parents[1]
 WORKFLOW = ROOT / ".github/workflows/monitor.yml"
 WRANGLER = ROOT / "cloudflare/wrangler.toml"
-# Every run hour needs more than one tick, because Cloudflare does not retry a
-# tick it drops and the workflow has no cron of its own to fall back on.
-REQUIRED_TICKS_PER_HOUR = 2
+# The hourly cron is deliberately built to land exactly once per Pacific run
+# hour, not with spare ticks to fall back on: Cloudflare does not retry a tick
+# it drops, so a dropped tick now costs that hour's check for the day.
+REQUIRED_TICKS_PER_HOUR = 1
 
 
 def at(pacific_iso: str) -> datetime:
@@ -69,6 +70,8 @@ def test_worker_cron_reaches_every_run_hour_in_both_offsets(day):
     assert not unreachable, f"the Worker never ticks during Pacific hour(s) {unreachable}"
     thin = {hour: count for hour, count in arrivals.items() if count < REQUIRED_TICKS_PER_HOUR}
     assert not thin, f"a single dropped tick would lose Pacific hour(s): {thin}"
+    extra = {hour: count for hour, count in arrivals.items() if count > REQUIRED_TICKS_PER_HOUR}
+    assert not extra, f"expected exactly one tick per Pacific run hour, got: {extra}"
 
 
 def test_run_hours_are_the_only_schedule():
@@ -182,6 +185,6 @@ def test_never_more_than_eight_workflow_runs_a_day(day, outcome):
     assert replay_day(day, outcome) == len(RUN_HOURS) == 8
 
 
-@pytest.mark.parametrize("dropped", [{0}, {0, 1}, set(range(0, 144, 2))], ids=["one", "two", "half"])
+@pytest.mark.parametrize("dropped", [{0}, {0, 1}, set(range(0, 24, 2))], ids=["one", "two", "half"])
 def test_dropped_worker_ticks_do_not_raise_the_ceiling(dropped):
     assert replay_day("2026-07-15", "failure", dropped) <= len(RUN_HOURS)

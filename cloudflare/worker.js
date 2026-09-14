@@ -3,11 +3,13 @@
  *
  * GitHub's own `schedule` events are best-effort and this repo has been getting
  * roughly a quarter of them, 30-60 minutes late, so the workflow has no cron of
- * its own. The schedule lives here instead: tick every ten minutes, and dispatch
- * the workflow only for a Pacific hour that has neither an observation nor a
- * logged attempt. That caps GitHub at eight runs a day while still covering an
- * hour whose first tick was missed — which matters, because Cloudflare does not
- * retry a failed tick either.
+ * its own. The schedule lives here instead: tick once every UTC hour, at :05 —
+ * which lands five minutes past the Pacific hour year-round, since the US
+ * Pacific/UTC offset is always a whole number of hours — and dispatch the
+ * workflow only for a Pacific hour that has neither an observation nor a
+ * logged attempt. That caps GitHub at eight runs a day. Unlike a denser tick
+ * rate, a single dropped tick here simply costs that hour's check for the day;
+ * Cloudflare does not retry a failed tick.
  *
  * Deliberately duplicates RUN_HOURS from schedule.py rather than importing it:
  * the Worker decides whether to spend a dispatch, and schedule.py independently

@@ -6,12 +6,15 @@ quarter of them, 30-60 minutes late, so covering every Pacific hour through GitH
 scheduler would mean requesting far more arrivals than needed and turning most away.
 This Worker dispatches the workflow instead, once per Pacific run hour.
 
-The Worker ticks every ten minutes, ignores ticks outside `RUN_HOURS`, reads
+The Worker ticks once every UTC hour, at :05 — which lands five minutes past the Pacific
+hour year-round, since the US Pacific/UTC offset is always a whole number of hours, so no
+separate winter/summer schedule is needed. It ignores ticks outside `RUN_HOURS`, reads
 `state/current.json` and `state/run-status.json` to see whether the current Pacific hour
 already has an observation or a logged attempt, and dispatches only when it has neither.
-GitHub therefore runs the workflow **at most eight times a day**. A tick Cloudflare drops
-costs nothing, because the next one covers the same hour — which matters, since
-Cloudflare does not retry a failed tick.
+GitHub therefore runs the workflow **at most eight times a day**, each about five minutes
+after its Pacific run hour starts. Unlike a denser tick rate, a tick Cloudflare drops here
+costs that hour's check for the day — Cloudflare does not retry a failed tick, and there
+is no later tick in the same hour to fall back on.
 
 `schedule.py` re-applies both rules when the run starts, so the ceiling holds even if
 this Worker misbehaves or someone dispatches the workflow by hand in a loop. The two
@@ -21,7 +24,7 @@ implementations are kept in step by a differential test over 1,360 scenarios.
 
 | Limit | Used |
 | --- | --- |
-| 100,000 requests/day (cron ticks count) | 144 |
+| 100,000 requests/day (cron ticks count) | 24 |
 | 5 cron triggers per account | 1 |
 | 10 ms CPU per invocation (I/O wait excluded) | two fetches, small JSON parse |
 | 50 subrequests per invocation | 2 |

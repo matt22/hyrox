@@ -7,11 +7,21 @@ compatibility_date = "2026-09-13"
 workers_dev = false
 preview_urls = false
 
-# Every ten minutes: 144 invocations a day against a 100,000/day free-plan
-# allowance, and one of five free cron triggers. Only ticks inside a Pacific run
-# hour spend a subrequest, and an hour is dispatched only if it has neither an
-# observation nor a logged attempt — so GitHub runs this at most eight times a
-# day. Ticking well above eight is deliberate: Cloudflare does not retry a tick
-# it drops, and nothing else triggers the workflow.
+# Once every UTC hour, at :05: 24 invocations a day against a 100,000/day
+# free-plan allowance, and one of five free cron triggers (the free plan caps a
+# Worker at 5, so eight separate per-hour crons won't fit — one hourly cron
+# filtered in code is the only way to land on exactly eight days). Only ticks
+# inside a Pacific run hour spend a subrequest, and an hour is dispatched only
+# if it has neither an observation nor a logged attempt — so GitHub runs this
+# at most eight times a day, each about five minutes after the Pacific hour
+# starts. The US Pacific/UTC offset is always a whole number of hours, so a
+# fixed UTC :05 tick lands five minutes past the Pacific hour year-round,
+# across DST, with no separate winter/summer schedule needed.
+#
+# This trades away the old design's insurance against a dropped tick: ticking
+# every ten minutes meant a tick Cloudflare drops was covered by the next one
+# in the same hour. With one tick per hour, a dropped :05 tick means that
+# hour's check is skipped for the day — accepted here in exchange for landing
+# on the exact schedule requested.
 [triggers]
-crons = ["*/10 * * * *"]
+crons = ["5 * * * *"]
