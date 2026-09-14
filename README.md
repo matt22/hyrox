@@ -21,10 +21,10 @@ basis — this repo was receiving roughly a quarter of them, 30-60 minutes late 
 holding to eight runs a day through GitHub's scheduler is not possible: covering every
 Pacific hour would mean requesting far more arrivals than needed and turning most away,
 each one a run on the Actions log. The trigger is the Cloudflare Worker in
-[`cloudflare/`](cloudflare/) instead. It ticks once every UTC hour, at :05 — which lands
-five minutes past the Pacific hour year-round, since the US Pacific/UTC offset is always a
-whole number of hours — and dispatches the workflow only for a Pacific hour that has
-neither an observation nor a logged attempt.
+[`cloudflare/`](cloudflare/) instead: its cron lists the eight Pacific run hours directly,
+each at :05, as UTC — unioned across both DST offsets, since a fixed UTC hour means a
+different Pacific hour in summer than in winter — and dispatches the workflow only for a
+Pacific hour that has neither an observation nor a logged attempt.
 
 `schedule.py` applies the same two rules again when the run starts, before anything is
 installed, so the ceiling holds no matter what does the dispatching — including a

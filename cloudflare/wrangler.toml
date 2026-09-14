@@ -7,21 +7,25 @@ compatibility_date = "2026-09-13"
 workers_dev = false
 preview_urls = false
 
-# Once every UTC hour, at :05: 24 invocations a day against a 100,000/day
-# free-plan allowance, and one of five free cron triggers (the free plan caps a
-# Worker at 5, so eight separate per-hour crons won't fit — one hourly cron
-# filtered in code is the only way to land on exactly eight days). Only ticks
-# inside a Pacific run hour spend a subrequest, and an hour is dispatched only
-# if it has neither an observation nor a logged attempt — so GitHub runs this
-# at most eight times a day, each about five minutes after the Pacific hour
-# starts. The US Pacific/UTC offset is always a whole number of hours, so a
-# fixed UTC :05 tick lands five minutes past the Pacific hour year-round,
-# across DST, with no separate winter/summer schedule needed.
+# The 8 RUN_HOURS (schedule.py), each at :05, expressed directly as UTC hours —
+# one cron trigger, a single comma-separated field, no code-side filtering.
+# Pacific's UTC offset changes twice a year, so RUN_HOURS maps to a different
+# set of UTC hours in PDT (UTC-7) and PST (UTC-8); the field below is the union
+# of both, 10 distinct hours covering 6 that overlap between the two seasons.
+# On any given day only one offset is live, so exactly 8 of these 10 ticks land
+# in a Pacific run hour and dispatch; the other 2 land outside RUN_HOURS for
+# the current season and the Worker returns immediately, spending nothing.
+# `test_worker_cron_reaches_every_run_hour_in_both_offsets` in
+# tests/test_schedule.py checks this field against RUN_HOURS directly, so a
+# change to either one without the other fails CI.
 #
-# This trades away the old design's insurance against a dropped tick: ticking
-# every ten minutes meant a tick Cloudflare drops was covered by the next one
-# in the same hour. With one tick per hour, a dropped :05 tick means that
-# hour's check is skipped for the day — accepted here in exchange for landing
-# on the exact schedule requested.
+# 10 invocations a day against a 100,000/day free-plan allowance, and one of
+# five free cron triggers (the free plan caps a Worker at 5, but a single
+# trigger's cron string can list any number of hours, so this still costs 1).
+#
+# This carries the same trade-off as landing on exactly eight ticks always
+# does: Cloudflare does not retry a dropped tick, and there is no later tick in
+# the same hour to fall back on, so a dropped :05 tick costs that hour's check
+# for the day.
 [triggers]
-crons = ["5 * * * *"]
+crons = ["5 8,9,13,14,15,16,17,18,19,20 * * *"]

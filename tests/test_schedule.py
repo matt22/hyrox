@@ -185,6 +185,6 @@ def test_never_more_than_eight_workflow_runs_a_day(day, outcome):
     assert replay_day(day, outcome) == len(RUN_HOURS) == 8
 
 
-@pytest.mark.parametrize("dropped", [{0}, {0, 1}, set(range(0, 24, 2))], ids=["one", "two", "half"])
+@pytest.mark.parametrize("dropped", [{0}, {0, 1}, set(range(0, 10, 2))], ids=["one", "two", "half"])
 def test_dropped_worker_ticks_do_not_raise_the_ceiling(dropped):
     assert replay_day("2026-07-15", "failure", dropped) <= len(RUN_HOURS)

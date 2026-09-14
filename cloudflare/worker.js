@@ -3,13 +3,22 @@
  *
  * GitHub's own `schedule` events are best-effort and this repo has been getting
  * roughly a quarter of them, 30-60 minutes late, so the workflow has no cron of
- * its own. The schedule lives here instead: tick once every UTC hour, at :05 —
- * which lands five minutes past the Pacific hour year-round, since the US
- * Pacific/UTC offset is always a whole number of hours — and dispatch the
- * workflow only for a Pacific hour that has neither an observation nor a
- * logged attempt. That caps GitHub at eight runs a day. Unlike a denser tick
- * rate, a single dropped tick here simply costs that hour's check for the day;
- * Cloudflare does not retry a failed tick.
+ * its own. The schedule lives here instead: the Worker's cron trigger in
+ * wrangler.toml lists RUN_HOURS' eight Pacific hours directly, each at :05, as
+ * UTC — unioned across both DST offsets, since a fixed UTC hour means a
+ * different Pacific hour in PDT than in PST. Ten UTC hours cover the eight
+ * Pacific ones across both seasons; on any given day two of those ticks fall
+ * outside RUN_HOURS for the season in effect and are cheap no-ops.
+ *
+ * `scheduled()` below still exists to dispatch only for a Pacific hour that
+ * has neither an observation nor a logged attempt, and it still checks
+ * RUN_HOURS first — not because the cron might tick outside them (it won't,
+ * by construction), but because it's the single source of truth for whether a
+ * given tick's Pacific hour should dispatch at all, independent of what the
+ * cron string happens to contain. That caps GitHub at eight runs a day. A
+ * dropped tick here costs that hour's check for the day; Cloudflare does not
+ * retry a failed tick, and there is no later tick in the same hour to fall
+ * back on.
  *
  * Deliberately duplicates RUN_HOURS from schedule.py rather than importing it:
  * the Worker decides whether to spend a dispatch, and schedule.py independently
