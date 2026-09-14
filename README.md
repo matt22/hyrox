@@ -12,8 +12,8 @@ Charity, Adaptive, Pro, Spectator, and Youngstars tickets are explicitly exclude
 
 ## How it works
 
-The monitor attempts one check in each of eight Pacific hours: 1 AM, and hourly from
-6 AM through noon. That is a ceiling, not a target — the workflow never runs more than
+The monitor attempts one check in each of eight Pacific hours: midnight, 1 AM, and hourly
+from 7 AM through noon. That is a ceiling, not a target — the workflow never runs more than
 eight times a day.
 
 The workflow has no cron of its own. GitHub delivers `schedule` events on a best-effort

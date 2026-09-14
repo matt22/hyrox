@@ -58,7 +58,7 @@ def cron_arrivals() -> list[tuple[int, int]]:
 
 @pytest.mark.parametrize("day", ["2026-07-15", "2026-01-15"], ids=["PDT", "PST"])
 def test_worker_cron_reaches_every_run_hour_in_both_offsets(day):
-    """The old fixed-UTC window lost 6 AM every summer. This is that guard."""
+    """The old fixed-UTC window silently lost a run hour every summer. This is that guard."""
     arrivals = {hour: 0 for hour in RUN_HOURS}
     for utc_hour, minute in cron_arrivals():
         moment = datetime.fromisoformat(f"{day}T{utc_hour:02d}:{minute:02d}:00+00:00")

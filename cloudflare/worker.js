@@ -26,7 +26,7 @@
  * checked twice.
  */
 
-const RUN_HOURS = [1, 6, 7, 8, 9, 10, 11, 12];
+const RUN_HOURS = [0, 1, 7, 8, 9, 10, 11, 12];
 // Mirrors MAX_ATTEMPTS_PER_HOUR in schedule.py: one attempt per run hour, so
 // the workflow runs at most eight times a day. An hour is spent as soon as an
 // attempt is logged for it, successful or not — a failed check is recorded in

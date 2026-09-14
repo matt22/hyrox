@@ -23,9 +23,11 @@ from zoneinfo import ZoneInfo
 
 PACIFIC = ZoneInfo("America/Los_Angeles")
 # The Pacific hours we want one observation in, and the single source of truth
-# for the schedule. The Worker's cron only has to tick often enough to land
-# inside each of them.
-RUN_HOURS = (1, 6, 7, 8, 9, 10, 11, 12)
+# for the schedule. The Worker's cron (cloudflare/wrangler.toml) lists these
+# same eight hours directly, so a change here needs a matching change there —
+# test_worker_cron_reaches_every_run_hour_in_both_offsets in
+# tests/test_schedule.py fails if the two drift apart.
+RUN_HOURS = (0, 1, 7, 8, 9, 10, 11, 12)
 CHECKS_PER_DAY = len(RUN_HOURS)
 HISTORY_DAYS = 2
 # One heartbeat at the final check of each contiguous block of RUN_HOURS.
