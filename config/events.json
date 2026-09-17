@@ -1,0 +1,20 @@
+{
+  "anaheim-2026": {
+    "name": "Centr HYROX Anaheim 2026",
+    "city": "Anaheim",
+    "year": 2026,
+    "timezone": "America/Los_Angeles",
+    "source_url": "https://usa.hyrox.com/events/hyrox-anaheim-season-26-27-edyxxn",
+    "divisions_tracked": [
+      "Men's Open Singles",
+      "Women's Open Singles",
+      "Women's Open Doubles",
+      "Mixed Open Doubles",
+      "Mixed Open Relay"
+    ],
+    "run_hours": [0, 1, 7, 8, 9, 10, 11, 12],
+    "status": "active",
+    "notify_users": ["matt22"],
+    "is_default": true
+  }
+}
