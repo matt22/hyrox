@@ -16,5 +16,65 @@
     "status": "active",
     "notify_users": ["matt22"],
     "is_default": true
+  },
+  "las-vegas-2027": {
+    "name": "HYROX Las Vegas 2027",
+    "city": "Las Vegas",
+    "year": 2027,
+    "timezone": "America/Los_Angeles",
+    "venue": "Las Vegas Convention Center, 3150 Paradise Rd, Las Vegas, NV 89109",
+    "event_dates": "2027-03-12 to 2027-03-14",
+    "source_url": null,
+    "divisions_tracked": [
+      "Men's Open Singles",
+      "Women's Open Singles",
+      "Women's Open Doubles",
+      "Mixed Open Doubles",
+      "Mixed Open Relay"
+    ],
+    "run_hours": [0, 1, 7, 8, 9, 10, 11, 12],
+    "status": "upcoming",
+    "notify_users": ["matt22"],
+    "is_default": false
+  },
+  "san-diego-2027": {
+    "name": "EōS Fitness HYROX San Diego 2027",
+    "city": "San Diego",
+    "year": 2027,
+    "timezone": "America/Los_Angeles",
+    "venue": "San Diego Convention Center, 111 Harbor Dr, San Diego, CA 92101",
+    "event_dates": "2027-05-13 to 2027-05-16",
+    "source_url": null,
+    "divisions_tracked": [
+      "Men's Open Singles",
+      "Women's Open Singles",
+      "Women's Open Doubles",
+      "Mixed Open Doubles",
+      "Mixed Open Relay"
+    ],
+    "run_hours": [0, 1, 7, 8, 9, 10, 11, 12],
+    "status": "upcoming",
+    "notify_users": ["matt22"],
+    "is_default": false
+  },
+  "portland-2027": {
+    "name": "HYROX Portland 2027",
+    "city": "Portland",
+    "year": 2027,
+    "timezone": "America/Los_Angeles",
+    "venue": "Oregon Convention Center, 777 NE Martin Luther King Jr Blvd, Portland, OR 97232",
+    "event_dates": "2027-05-21 to 2027-05-23",
+    "source_url": null,
+    "divisions_tracked": [
+      "Men's Open Singles",
+      "Women's Open Singles",
+      "Women's Open Doubles",
+      "Mixed Open Doubles",
+      "Mixed Open Relay"
+    ],
+    "run_hours": [0, 1, 7, 8, 9, 10, 11, 12],
+    "status": "upcoming",
+    "notify_users": ["matt22"],
+    "is_default": false
   }
 }
