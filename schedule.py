@@ -39,27 +39,37 @@ SUMMARY_HOURS = (1, 12)
 MAX_ATTEMPTS_PER_HOUR = 1
 
 
+def now_in_zone(tz: ZoneInfo, now: datetime | None = None) -> datetime:
+    return (now or datetime.now(timezone.utc)).astimezone(tz)
+
+
 def now_pacific(now: datetime | None = None) -> datetime:
-    return (now or datetime.now(timezone.utc)).astimezone(PACIFIC)
+    return now_in_zone(PACIFIC, now)
 
 
-def hour_key(moment: datetime | str) -> str:
-    """Identify the Pacific hour an instant falls in, e.g. '2026-09-13T10'."""
+def hour_key(moment: datetime | str, tz: ZoneInfo = PACIFIC) -> str:
+    """Identify the tz-local hour an instant falls in, e.g. '2026-09-13T10'.
+
+    Every event currently monitored uses Pacific, hence the default; a
+    non-Pacific event just needs to pass its own IANA zone here and to `due`.
+    """
     if isinstance(moment, str):
         moment = datetime.fromisoformat(moment)
-    return now_pacific(moment).strftime("%Y-%m-%dT%H")
+    return now_in_zone(tz, moment).strftime("%Y-%m-%dT%H")
 
 
-def scheduled_now(now: datetime | None = None) -> bool:
-    return now_pacific(now).hour in RUN_HOURS
+def scheduled_now(now: datetime | None = None, *, tz: ZoneInfo = PACIFIC,
+                   run_hours: tuple[int, ...] = RUN_HOURS) -> bool:
+    return now_in_zone(tz, now).hour in run_hours
 
 
-def block_summary_due(now: datetime | None = None) -> bool:
-    return now_pacific(now).hour in SUMMARY_HOURS
+def block_summary_due(now: datetime | None = None, *, tz: ZoneInfo = PACIFIC,
+                       summary_hours: tuple[int, ...] = SUMMARY_HOURS) -> bool:
+    return now_in_zone(tz, now).hour in summary_hours
 
 
-def recorded_hours(state: dict | None) -> set[str]:
-    """Every Pacific hour already covered by a recorded observation.
+def recorded_hours(state: dict | None, tz: ZoneInfo = PACIFIC) -> set[str]:
+    """Every tz-local hour already covered by a recorded observation.
 
     Deliveries arrive out of order — a slot delayed an hour can land after a
     punctual later one — so this looks across the retained history rather than
@@ -69,13 +79,13 @@ def recorded_hours(state: dict | None) -> set[str]:
         return set()
     history = state.get("history") or [state]
     return {
-        hour_key(item["checked_at"]) for item in history
+        hour_key(item["checked_at"], tz) for item in history
         if isinstance(item, dict) and item.get("checked_at")
     }
 
 
 def attempts_in_hour(runs: dict | None, key: str) -> int:
-    """How many workflow attempts have already been logged for a Pacific hour."""
+    """How many workflow attempts have already been logged for a tz-local hour."""
     if not runs:
         return 0
     return sum(
@@ -85,21 +95,27 @@ def attempts_in_hour(runs: dict | None, key: str) -> int:
     )
 
 
-def due(state: dict | None, now: datetime | None = None,
-        runs: dict | None = None) -> tuple[bool, str]:
-    """Decide whether this arrival should perform a check, and say why."""
-    local = now_pacific(now)
-    if local.hour not in RUN_HOURS:
-        return False, f"{local:%H:%M} Pacific is outside the requested run hours"
-    key = hour_key(local)
-    if key in recorded_hours(state):
-        return False, f"the {local:%H:00} Pacific check is already recorded"
+def due(state: dict | None, now: datetime | None = None, runs: dict | None = None, *,
+        tz: ZoneInfo = PACIFIC, run_hours: tuple[int, ...] = RUN_HOURS) -> tuple[bool, str]:
+    """Decide whether this arrival should perform a check, and say why.
+
+    `tz` and `run_hours` default to the Anaheim schedule so every existing
+    caller (the CLI below, monitor.py) is unaffected; a future per-event
+    caller passes that event's own `timezone`/`run_hours` from
+    config/events.json instead.
+    """
+    local = now_in_zone(tz, now)
+    if local.hour not in run_hours:
+        return False, f"{local:%H:%M} {tz.key} is outside the requested run hours"
+    key = hour_key(local, tz)
+    if key in recorded_hours(state, tz):
+        return False, f"the {local:%H:00} {tz.key} check is already recorded"
     # Only reached when the hour has no observation, so any logged attempt for
     # it failed. The hour is spent either way.
     attempts = attempts_in_hour(runs, key)
     if attempts >= MAX_ATTEMPTS_PER_HOUR:
-        return False, f"the {local:%H:00} Pacific hour already used its attempt"
-    return True, f"no check recorded yet for {local:%H:00} Pacific"
+        return False, f"the {local:%H:00} {tz.key} hour already used its attempt"
+    return True, f"no check recorded yet for {local:%H:00} {tz.key}"
 
 
 def load_state(path: Path) -> dict | None:

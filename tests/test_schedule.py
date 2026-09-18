@@ -151,6 +151,19 @@ def test_attempts_in_other_hours_do_not_block_this_one():
     assert due(None, at("2026-09-13T10:23"), runs=failures)[0] is True
 
 
+def test_due_accepts_a_non_pacific_zone_independently_of_the_pacific_default():
+    """A future Mountain-time event must not need its own copy of schedule.py."""
+    from zoneinfo import ZoneInfo
+
+    denver = ZoneInfo("America/Denver")
+    # 10:03 Mountain is 9:03 Pacific — inside Anaheim's RUN_HOURS but not
+    # Denver's, proving the two schedules are evaluated independently.
+    denver_moment = datetime(2026, 9, 13, 16, 3, tzinfo=timezone.utc)  # 10:03 MDT / 9:03 PDT
+    assert due(None, denver_moment, tz=denver, run_hours=(10,))[0] is True
+    assert due(None, denver_moment, run_hours=(10,))[0] is False  # default tz=Pacific
+    assert due(None, denver_moment, tz=denver, run_hours=(9,))[0] is False
+
+
 def test_workflow_run_status_cap_matches_the_schedule_constants():
     """The workflow hardcodes this so it still logs when schedule.py is broken."""
     literal = re.search(r"^\s*limit = (\d+)\b", WORKFLOW.read_text(), re.M)
