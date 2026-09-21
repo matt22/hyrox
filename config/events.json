@@ -5,6 +5,8 @@
     "year": 2026,
     "timezone": "America/Los_Angeles",
     "source_url": "https://usa.hyrox.com/events/hyrox-anaheim-season-26-27-edyxxn",
+    "first_ticket_sale_date": "2026-08-13",
+    "first_ticket_sale_date_confirmed": true,
     "divisions_tracked": [
       "Men's Open Singles",
       "Women's Open Singles",
@@ -25,6 +27,8 @@
     "venue": "Las Vegas Convention Center, 3150 Paradise Rd, Las Vegas, NV 89109",
     "event_dates": "2027-03-12 to 2027-03-14",
     "source_url": null,
+    "first_ticket_sale_date": "2026-11-20",
+    "first_ticket_sale_date_confirmed": false,
     "divisions_tracked": [
       "Men's Open Singles",
       "Women's Open Singles",
@@ -45,6 +49,8 @@
     "venue": "San Diego Convention Center, 111 Harbor Dr, San Diego, CA 92101",
     "event_dates": "2027-05-13 to 2027-05-16",
     "source_url": null,
+    "first_ticket_sale_date": "2027-01-21",
+    "first_ticket_sale_date_confirmed": false,
     "divisions_tracked": [
       "Men's Open Singles",
       "Women's Open Singles",
@@ -65,6 +71,8 @@
     "venue": "Oregon Convention Center, 777 NE Martin Luther King Jr Blvd, Portland, OR 97232",
     "event_dates": "2027-05-21 to 2027-05-23",
     "source_url": null,
+    "first_ticket_sale_date": "2027-01-29",
+    "first_ticket_sale_date_confirmed": false,
     "divisions_tracked": [
       "Men's Open Singles",
       "Women's Open Singles",

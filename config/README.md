@@ -16,6 +16,12 @@ so the data is staged ahead of that work.
 - `venue`, `event_dates` — informational; not consumed by any script.
 - `source_url` — the Vivenu ticket-shop URL `monitor.py` scrapes. `null`
   until tickets go on sale; a monitored event needs this.
+- `first_ticket_sale_date` — the date general tickets first went (or are
+  predicted to go) on sale, `YYYY-MM-DD`. `null` if not yet known.
+- `first_ticket_sale_date_confirmed` — `true` once the date is a known fact
+  (e.g. observed going live, or officially announced); `false` while it's
+  a prediction. Correct both fields as better info comes in — a prediction
+  is expected to be wrong and gets overwritten, not preserved for history.
 - `divisions_tracked` — ticket categories to watch, matching the exclusions
   in the main README (Charity/Adaptive/Pro/Spectator/Youngstars excluded).
 - `run_hours` — hours (0–23) in the event's own `timezone` to attempt one
