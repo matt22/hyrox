@@ -29,8 +29,8 @@
     "event_dates": "2027-02-25 to 2027-02-28",
     "source_url": null,
     "first_competition_date": "2027-02-25",
-    "first_ticket_sale_date": "2026-11-05",
-    "first_ticket_sale_date_confirmed": false,
+    "first_ticket_sale_date": "2026-10-08",
+    "first_ticket_sale_date_confirmed": true,
     "divisions_tracked": [
       "Men's Open Singles",
       "Women's Open Singles",
