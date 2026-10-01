@@ -20,6 +20,29 @@
     "notify_users": ["matt22"],
     "is_default": true
   },
+  "phoenix-2027": {
+    "name": "InBody HYROX Phoenix 2027",
+    "city": "Phoenix",
+    "year": 2027,
+    "timezone": "America/Phoenix",
+    "venue": "State Farm Stadium, 1 Cardinals Dr, Glendale, AZ 85305",
+    "event_dates": "2027-02-25 to 2027-02-28",
+    "source_url": null,
+    "first_competition_date": "2027-02-25",
+    "first_ticket_sale_date": "2026-11-05",
+    "first_ticket_sale_date_confirmed": false,
+    "divisions_tracked": [
+      "Men's Open Singles",
+      "Women's Open Singles",
+      "Women's Open Doubles",
+      "Mixed Open Doubles",
+      "Mixed Open Relay"
+    ],
+    "run_hours": [0, 1, 7, 8, 9, 10, 11, 12],
+    "status": "upcoming",
+    "notify_users": ["matt22"],
+    "is_default": false
+  },
   "las-vegas-2027": {
     "name": "HYROX Las Vegas 2027",
     "city": "Las Vegas",
