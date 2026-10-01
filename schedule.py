@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import argparse
 import json
-from datetime import datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -37,6 +37,10 @@ SUMMARY_HOURS = (1, 12)
 # not: a failed check is recorded in state/run-status.json and shown on the
 # dashboard rather than retried.
 MAX_ATTEMPTS_PER_HOUR = 1
+# Checks stop this many days before the first day of competition (from
+# midnight Pacific that day): openings that late are no use to us.
+STOP_DAYS_BEFORE_COMPETITION = 5
+EVENTS_CONFIG = Path(__file__).resolve().parent / "config/events.json"
 
 
 def now_in_zone(tz: ZoneInfo, now: datetime | None = None) -> datetime:
@@ -95,8 +99,19 @@ def attempts_in_hour(runs: dict | None, key: str) -> int:
     )
 
 
+def checks_stop_on(config: Path = EVENTS_CONFIG) -> date | None:
+    """The tz-local date checks stop for the default event, if it has one."""
+    events = load_state(config) or {}
+    event = next((item for item in events.values() if item.get("is_default")), {})
+    first_day = event.get("first_competition_date")
+    if not first_day:
+        return None
+    return date.fromisoformat(first_day) - timedelta(days=STOP_DAYS_BEFORE_COMPETITION)
+
+
 def due(state: dict | None, now: datetime | None = None, runs: dict | None = None, *,
-        tz: ZoneInfo = PACIFIC, run_hours: tuple[int, ...] = RUN_HOURS) -> tuple[bool, str]:
+        tz: ZoneInfo = PACIFIC, run_hours: tuple[int, ...] = RUN_HOURS,
+        stop_on: date | None = None) -> tuple[bool, str]:
     """Decide whether this arrival should perform a check, and say why.
 
     `tz` and `run_hours` default to the Anaheim schedule so every existing
@@ -105,6 +120,8 @@ def due(state: dict | None, now: datetime | None = None, runs: dict | None = Non
     config/events.json instead.
     """
     local = now_in_zone(tz, now)
+    if stop_on and local.date() >= stop_on:
+        return False, f"checks stopped on {stop_on}, {STOP_DAYS_BEFORE_COMPETITION} days before competition"
     if local.hour not in run_hours:
         return False, f"{local:%H:%M} {tz.key} is outside the requested run hours"
     key = hour_key(local, tz)
@@ -136,7 +153,9 @@ def main() -> int:
     if args.force:
         should_run, reason = True, "manually dispatched"
     else:
-        should_run, reason = due(load_state(args.state), runs=load_state(args.runs))
+        should_run, reason = due(
+            load_state(args.state), runs=load_state(args.runs), stop_on=checks_stop_on()
+        )
     print(f"due={'true' if should_run else 'false'}")
     print(f"reason={reason}")
     return 0

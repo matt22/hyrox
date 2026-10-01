@@ -1,14 +1,15 @@
 """The scheduling policy, and the cron expression that has to feed it."""
 
 import re
-from datetime import datetime, timedelta, timezone
+import json
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
 
 from schedule import (
-    CHECKS_PER_DAY, HISTORY_DAYS, MAX_ATTEMPTS_PER_HOUR, PACIFIC, RUN_HOURS, due,
-    hour_key, scheduled_now,
+    CHECKS_PER_DAY, HISTORY_DAYS, MAX_ATTEMPTS_PER_HOUR, PACIFIC, RUN_HOURS, checks_stop_on,
+    due, hour_key, scheduled_now,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -201,3 +202,23 @@ def test_never_more_than_eight_workflow_runs_a_day(day, outcome):
 @pytest.mark.parametrize("dropped", [{0}, {0, 1}, set(range(0, 10, 2))], ids=["one", "two", "half"])
 def test_dropped_worker_ticks_do_not_raise_the_ceiling(dropped):
     assert replay_day("2026-07-15", "failure", dropped) <= len(RUN_HOURS)
+
+
+def test_anaheim_checks_stop_five_days_before_the_first_competition_day():
+    assert checks_stop_on() == date(2026, 11, 28)
+
+
+def test_checks_run_until_the_stop_date_then_never_again():
+    stop_on = date(2026, 11, 28)
+    assert due(None, at("2026-11-27T12:05"), stop_on=stop_on)[0]
+    for moment in ("2026-11-28T00:05", "2026-11-28T12:05", "2026-12-03T09:05", "2027-01-01T07:05"):
+        should_run, reason = due(None, at(moment), stop_on=stop_on)
+        assert not should_run
+        assert "checks stopped" in reason
+
+
+def test_missing_competition_date_never_stops_checks(tmp_path):
+    config = tmp_path / "events.json"
+    config.write_text(json.dumps({"x": {"is_default": True}}))
+    assert checks_stop_on(config) is None
+    assert checks_stop_on(tmp_path / "missing.json") is None

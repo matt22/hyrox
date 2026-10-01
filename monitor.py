@@ -16,7 +16,7 @@ from urllib.parse import urljoin
 
 from playwright.sync_api import Page, TimeoutError as PlaywrightTimeoutError, sync_playwright
 
-from schedule import CHECKS_PER_DAY, HISTORY_DAYS, block_summary_due, due, load_state
+from schedule import CHECKS_PER_DAY, HISTORY_DAYS, block_summary_due, checks_stop_on, due, load_state
 
 
 EVENT_URL = "https://usa.hyrox.com/events/hyrox-anaheim-season-26-27-edyxxn"
@@ -325,7 +325,9 @@ def main() -> int:
     args = parser.parse_args()
 
     if args.schedule_guard:
-        should_run, reason = due(load_state(args.state), runs=load_state(args.runs))
+        should_run, reason = due(
+            load_state(args.state), runs=load_state(args.runs), stop_on=checks_stop_on()
+        )
         if not should_run:
             print(f"Skipping check: {reason}.")
             return 0
