@@ -162,7 +162,32 @@ function checkRateCopy(history) {
   return `${days} day${days === 1 ? '' : 's'} · ${perDay.toFixed(perDay % 1 ? 1 : 0)}/day`;
 }
 
-function render(data, runStatus) {
+// One row per Pacific day so a long run of openings stays short vertically.
+function renderOpenings(openings, history) {
+  const list = document.querySelector('#openings-list');
+  if (!openings.length) {
+    list.innerHTML = '<p class="px-3 py-3 text-xs font-semibold text-gray-300">No tickets found yet.</p>';
+    return;
+  }
+  const retained = new Set(history.map((observation) => observation.checked_at));
+  const days = new Map();
+  [...openings].reverse().forEach((observation) => {
+    const day = formatTime(observation.checked_at, { hour: undefined, minute: undefined, weekday: 'short' });
+    if (!days.has(day)) days.set(day, []);
+    days.get(day).push(observation);
+  });
+  list.innerHTML = [...days].map(([day, observations]) => `
+    <div class="grid grid-cols-[6.5rem_minmax(0,1fr)] items-start gap-3 px-3 py-2">
+      <span class="pt-1 text-xs font-bold text-white">${day}</span>
+      <div class="flex flex-wrap gap-1.5">${observations.flatMap((observation) => Object.keys(observation.tickets)
+        .filter((name) => observation.tickets[name].status === 'available')
+        .map((name) => `<button type="button" data-category="${escapeHtml(name)}" data-time="${observation.checked_at}" title="${retained.has(observation.checked_at) ? 'Also in history above' : 'Archived'}" class="inline-flex items-center gap-1.5 border border-lime/25 bg-lime/10 px-2 py-1 text-[11px] font-bold text-lime transition hover:border-lime/60 focus:outline-none focus:ring-2 focus:ring-cyan/60">
+          <span class="h-1.5 w-1.5 rounded-full bg-lime shadow-[0_0_8px_rgba(142,234,111,.6)]"></span><span class="text-slate-200">${formatClock(observation.checked_at)}</span>${escapeHtml(name)}
+        </button>`)).join('')}</div>
+    </div>`).join('');
+}
+
+function render(data, runStatus, openings = []) {
   state.data = data;
   const { meta, history } = data;
   const latest = history.at(-1);
@@ -180,7 +205,7 @@ function render(data, runStatus) {
   document.querySelector('#range-label').textContent = `${displayHistory.length} attempts · Newest first · ${formatTime(displayHistory.at(-1).time)}–${formatTime(displayHistory[0].time)}`;
   document.querySelector('#summary').innerHTML = [
     summaryCard('Available now', `${availableNow}/${categories.length}`, availableNow ? 'Tickets detected' : 'All monitored tickets closed', availableNow ? 'text-lime' : 'text-coral'),
-    summaryCard('Ticket openings', meta.total_openings, 'Within retained history', meta.total_openings ? 'text-lime' : 'text-white'),
+    summaryCard('Times found', openings.length, `All-time · ${meta.total_openings} opening${meta.total_openings === 1 ? '' : 's'} in window`, openings.length ? 'text-lime' : 'text-white'),
     summaryCard('Checks logged', meta.observation_count, checkRateCopy(history), 'text-cyan', { href: 'https://github.com/matt22/hyrox/blob/main/state/current.json', label: 'Data Log ↗' }),
     summaryCard('Divisions tracked', categories.length, 'Selected event categories', 'text-white')
   ].join('');
@@ -222,11 +247,13 @@ function render(data, runStatus) {
   </div>`;
 
   renderSnapshot(latest, categories, meta);
+  renderOpenings(openings, history);
 
   document.addEventListener('click', (event) => {
     const trigger = event.target.closest('[data-category][data-time]');
     if (!trigger) return;
-    const observation = history.find((item) => item.checked_at === trigger.dataset.time);
+    const observation = history.find((item) => item.checked_at === trigger.dataset.time)
+      || openings.find((item) => item.checked_at === trigger.dataset.time);
     if (observation) {
       renderSnapshot(observation, categories, meta);
       selectCategory(trigger.dataset.category);
@@ -246,10 +273,11 @@ const fetchJson = (url) => fetch(url, { cache: 'no-store' }).then((response) => 
 
 Promise.all([
   fetchJson('state/current.json'),
-  fetchJson('state/run-status.json').catch(() => null)
+  fetchJson('state/run-status.json').catch(() => null),
+  fetchJson('state/openings.json').catch(() => ({ openings: [] }))
 ])
-  .then(([data, runStatus]) => {
-    render(data, runStatus);
+  .then(([data, runStatus, archive]) => {
+    render(data, runStatus, archive.openings || []);
     renderRunStatus(runStatus);
   })
   .catch((error) => {

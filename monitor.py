@@ -299,11 +299,25 @@ def rolling_state(previous: dict | None, current: dict, limit: int | None = None
     }
 
 
+def record_openings(archive: dict | None, observation: dict) -> dict:
+    """Append observations with any available ticket to the permanent archive.
+
+    The rolling history drops old checks, so this is the only lasting record of
+    when tickets were seen. It is never truncated.
+    """
+    openings = list(archive.get("openings", [])) if archive else []
+    if any(ticket["status"] == "available" for ticket in observation["tickets"].values()):
+        if all(item["checked_at"] != observation["checked_at"] for item in openings):
+            openings.append(observation)
+    return {"openings": openings}
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--url", default=os.getenv("HYROX_TICKET_URL", EVENT_URL))
     parser.add_argument("--state", type=Path, default=Path("state/current.json"))
     parser.add_argument("--runs", type=Path, default=Path("state/run-status.json"))
+    parser.add_argument("--openings", type=Path, default=Path("state/openings.json"))
     parser.add_argument("--snapshot", type=Path, default=Path("state/latest.json"))
     parser.add_argument("--diagnostics", type=Path, default=Path("diagnostics"))
     parser.add_argument("--schedule-guard", action="store_true")
@@ -331,6 +345,10 @@ def main() -> int:
     # Preserve the intentionally human-oriented schema order: metadata first,
     # followed by chronological observations.
     args.state.write_text(json.dumps(rolling, indent=2) + "\n", encoding="utf-8")
+    archive = json.loads(args.openings.read_text()) if args.openings.exists() else None
+    args.openings.write_text(
+        json.dumps(record_openings(archive, current), indent=2) + "\n", encoding="utf-8"
+    )
     Path(os.getenv("GITHUB_OUTPUT", os.devnull)).open("a", encoding="utf-8").write(
         f"initialized={'true' if previous else 'false'}\n"
         f"changed={'true' if delta else 'false'}\n"

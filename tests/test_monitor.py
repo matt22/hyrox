@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 import pytest
 
 from monitor import (
-    StructureError, changes, parse_ticket_texts, requested_history_limit, rolling_state,
+    StructureError, changes, parse_ticket_texts, record_openings, requested_history_limit, rolling_state,
 )
 from notify import notification_users, render_markdown
 from schedule import CHECKS_PER_DAY, HISTORY_DAYS, block_summary_due
@@ -133,3 +133,14 @@ def test_notification_users_are_validated_and_deduplicated():
     assert notification_users("@matt22, second-user, matt22") == ["matt22", "second-user"]
     with pytest.raises(ValueError):
         notification_users("not valid!")
+
+
+def test_record_openings_keeps_available_checks_forever_without_duplicates():
+    archive = record_openings(None, observation("2026-08-15T00:00:00+00:00", "unavailable"))
+    assert archive == {"openings": []}
+    found = observation("2026-08-15T01:00:00+00:00", "available")
+    archive = record_openings(archive, found)
+    archive = record_openings(archive, found)
+    for hour in range(2, 40):
+        archive = record_openings(archive, observation(f"2026-08-{15 + hour // 24}T{hour % 24:02d}:00:00+00:00", "unavailable"))
+    assert [item["checked_at"] for item in archive["openings"]] == ["2026-08-15T01:00:00+00:00"]
