@@ -197,6 +197,47 @@ function renderOpenings(openings, history, firstCompetitionDate) {
     </div>`).join('');
 }
 
+// Registry dates are calendar dates, so format them in UTC to keep the day from shifting.
+const formatCalendarDate = (date, options = {}) => new Intl.DateTimeFormat('en-US', {
+  timeZone: 'UTC',
+  month: 'short',
+  day: 'numeric',
+  ...options
+}).format(new Date(date));
+
+function eventDatesCopy(eventDates) {
+  const [start, end] = eventDates.split(' to ');
+  if (!end) return formatCalendarDate(start, { year: 'numeric' });
+  const sameMonth = start.slice(0, 7) === end.slice(0, 7);
+  return `${formatCalendarDate(start)}–${sameMonth ? formatCalendarDate(end, { month: undefined }) : formatCalendarDate(end)}, ${end.slice(0, 4)}`;
+}
+
+function renderUpcoming(events) {
+  const list = document.querySelector('#upcoming-list');
+  const upcoming = Object.values(events)
+    .filter((event) => event.status === 'upcoming')
+    .sort((a, b) => (a.event_dates || '').localeCompare(b.event_dates || ''));
+  if (!upcoming.length) {
+    list.innerHTML = '<p class="px-3 py-3 text-xs font-semibold text-gray-300">No upcoming events staged.</p>';
+    return;
+  }
+  list.innerHTML = upcoming.map((event) => {
+    const sale = event.first_ticket_sale_date
+      ? `Tickets ${formatCalendarDate(event.first_ticket_sale_date)} · ${event.first_ticket_sale_date_confirmed ? 'Confirmed' : 'Estimated'}`
+      : 'Ticket sale date TBA';
+    return `<a href="${escapeHtml(event.event_url)}" target="_blank" rel="noreferrer" class="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 px-3 py-2.5 transition hover:bg-white/[.03] focus:outline-none focus:ring-2 focus:ring-inset focus:ring-cyan/60">
+      <span class="min-w-0 flex-1 basis-56">
+        <span class="block truncate text-xs font-bold text-white">${escapeHtml(event.name)}</span>
+        <span class="block truncate text-[11px] font-semibold text-gray-300">${event.event_dates ? eventDatesCopy(event.event_dates) : 'Dates TBA'}${event.venue ? ` · ${escapeHtml(event.venue.split(',')[0])}` : ''}</span>
+      </span>
+      <span class="flex items-center gap-3">
+        <span class="whitespace-nowrap border px-2 py-1 text-[11px] font-bold uppercase tracking-wider ${event.first_ticket_sale_date_confirmed ? 'border-cyan/30 bg-cyan/10 text-cyan' : 'border-line bg-slate-950/40 text-gray-300'}">${sale}</span>
+        <span class="text-[11px] font-bold uppercase tracking-[.12em] text-gray-300" aria-hidden="true">↗</span>
+      </span>
+    </a>`;
+  }).join('');
+}
+
 function render(data, runStatus, openings = [], firstCompetitionDate = null) {
   state.data = data;
   const { meta, history } = data;
@@ -291,6 +332,7 @@ Promise.all([
     const event = Object.values(events).find((item) => item.is_default);
     render(data, runStatus, archive.openings || [], event?.first_competition_date);
     renderRunStatus(runStatus);
+    renderUpcoming(events);
   })
   .catch((error) => {
     document.querySelector('#last-updated').textContent = 'Data unavailable';

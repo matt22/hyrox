@@ -14,6 +14,8 @@ so the data is staged ahead of that work.
   default. Once per-event scheduling lands, this is what each event's
   `run_hours` will be interpreted in.
 - `venue`, `event_dates` — informational; not consumed by any script.
+- `event_url` — the official hyrox.com event page. The dashboard's upcoming
+  events list links here, so fill it in even before tickets go on sale.
 - `source_url` — the Vivenu ticket-shop URL `monitor.py` scrapes. `null`
   until tickets go on sale; a monitored event needs this.
 - `first_ticket_sale_date` — the date general tickets first went (or are
