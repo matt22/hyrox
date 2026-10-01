@@ -212,6 +212,12 @@ function eventDatesCopy(eventDates) {
   return `${formatCalendarDate(start)}–${sameMonth ? formatCalendarDate(end, { month: undefined }) : formatCalendarDate(end)}, ${end.slice(0, 4)}`;
 }
 
+// The registry has no state field, so take it from the venue's street address.
+function eventPlaceCopy(event) {
+  const state = event.venue?.match(/,\s*([A-Z]{2})\s+\d{5}/)?.[1];
+  return state ? `${event.city}, ${state}` : event.city;
+}
+
 function renderUpcoming(events) {
   const list = document.querySelector('#upcoming-list');
   const upcoming = Object.values(events)
@@ -221,14 +227,26 @@ function renderUpcoming(events) {
     list.innerHTML = '<p class="px-3 py-3 text-xs font-semibold text-gray-300">No upcoming events staged.</p>';
     return;
   }
-  list.innerHTML = upcoming.map((event) => {
-    const sale = event.first_ticket_sale_date
-      ? `Tickets ${formatCalendarDate(event.first_ticket_sale_date)} · ${event.first_ticket_sale_date_confirmed ? 'Confirmed' : 'Estimated'}`
+  const saleDate = (event) => event.first_ticket_sale_date ? formatCalendarDate(event.first_ticket_sale_date) : null;
+  const datesCopy = (event) => event.event_dates ? eventDatesCopy(event.event_dates) : 'Dates TBA';
+
+  // Desktop: one compact delimited line; the full name and venue live in the tooltip.
+  const line = upcoming.map((event) => `<a href="${escapeHtml(event.event_url)}" target="_blank" rel="noreferrer" title="${escapeHtml([event.name, datesCopy(event), event.venue].filter(Boolean).join(' · '))}" class="whitespace-nowrap transition hover:text-white focus:outline-none focus:ring-2 focus:ring-cyan/60">
+      <span class="font-bold text-cyan">${escapeHtml(eventPlaceCopy(event))}</span> ${datesCopy(event).replace(/, \d{4}$/, '')}
+      <span class="text-gray-400">· Tickets</span> ${saleDate(event)
+        ? `<span class="${event.first_ticket_sale_date_confirmed ? 'font-bold text-cyan' : ''}">${event.first_ticket_sale_date_confirmed ? '' : '~'}${saleDate(event)}</span>${event.first_ticket_sale_date_confirmed ? '' : ' <span class="text-gray-400">est.</span>'}`
+        : 'TBA'} <span aria-hidden="true">↗</span>
+    </a>`).join('<span aria-hidden="true" class="text-line">|</span>');
+
+  // Mobile: one stacked row per event.
+  const rows = upcoming.map((event) => {
+    const sale = saleDate(event)
+      ? `Tickets ${saleDate(event)} · ${event.first_ticket_sale_date_confirmed ? 'Confirmed' : 'Estimated'}`
       : 'Ticket sale date TBA';
     return `<a href="${escapeHtml(event.event_url)}" target="_blank" rel="noreferrer" class="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 px-3 py-2.5 transition hover:bg-white/[.03] focus:outline-none focus:ring-2 focus:ring-inset focus:ring-cyan/60">
       <span class="min-w-0 flex-1 basis-56">
         <span class="block truncate text-xs font-bold text-white">${escapeHtml(event.name)}</span>
-        <span class="block truncate text-[11px] font-semibold text-gray-300">${event.event_dates ? eventDatesCopy(event.event_dates) : 'Dates TBA'}${event.venue ? ` · ${escapeHtml(event.venue.split(',')[0])}` : ''}</span>
+        <span class="block truncate text-[11px] font-semibold text-gray-300"><span class="font-bold text-cyan">${escapeHtml(eventPlaceCopy(event))} · ${datesCopy(event)}</span>${event.venue ? ` · ${escapeHtml(event.venue.split(',')[0])}` : ''}</span>
       </span>
       <span class="flex items-center gap-3">
         <span class="whitespace-nowrap border px-2 py-1 text-[11px] font-bold uppercase tracking-wider ${event.first_ticket_sale_date_confirmed ? 'border-cyan/30 bg-cyan/10 text-cyan' : 'border-line bg-slate-950/40 text-gray-300'}">${sale}</span>
@@ -236,6 +254,9 @@ function renderUpcoming(events) {
       </span>
     </a>`;
   }).join('');
+
+  list.innerHTML = `<div class="divide-y divide-line sm:hidden">${rows}</div>
+    <div class="hidden flex-wrap items-center gap-x-3 gap-y-1 px-3 py-2 text-[11px] font-semibold text-gray-300 sm:flex">${line}</div>`;
 }
 
 function render(data, runStatus, openings = [], firstCompetitionDate = null) {
