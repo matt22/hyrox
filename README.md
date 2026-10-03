@@ -49,6 +49,8 @@ reports, per ticket category, both the number of available observations and the
 number of transitions into availability during the retained observations.
 `total_openings` provides a quick sum of all such opening transitions still in the
 rolling history.
+Separately, `state/openings.json` is a never-truncated archive of every check that
+found any ticket available, which feeds the dashboard's "Past openings" panel.
 Unexpected page structures fail the job and upload
 HTML, visible text, a screenshot, and error context as a 14-day diagnostic artifact.
 Every attempt also commits `state/run-status.json`, which retains the latest
