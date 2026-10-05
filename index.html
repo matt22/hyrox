@@ -117,17 +117,19 @@
         </div>
       </section>
 
-      <section class="mb-3 flex items-center border border-line bg-panel/80" aria-labelledby="upcoming-heading">
-        <h2 id="upcoming-heading" title="Staged for monitoring once tickets go on sale" class="shrink-0 border-r border-line px-3 py-2 text-xs font-bold uppercase tracking-[.14em] text-slate-200">Coming soon</h2>
-        <div id="upcoming-list" class="min-w-0 flex-1 overflow-x-auto"></div>
-      </section>
+      <div class="mb-3 overflow-hidden border border-line shadow-glow">
+        <section class="flex items-center border-b border-line bg-panel/80" aria-labelledby="upcoming-heading">
+          <h2 id="upcoming-heading" title="Staged for monitoring once tickets go on sale" class="shrink-0 border-r border-line px-3 py-2 text-xs font-bold uppercase tracking-[.14em] text-slate-200">Coming soon</h2>
+          <div id="upcoming-list" class="min-w-0 flex-1 overflow-x-auto"></div>
+        </section>
 
-      <section class="mb-3 overflow-hidden border border-line shadow-glow" aria-labelledby="overview-heading">
-        <div class="border-b border-line bg-panel/80 px-3 py-2">
-          <h2 id="overview-heading" class="text-xs font-bold uppercase tracking-[.14em] text-slate-200">Monitor overview</h2>
-        </div>
-        <div id="summary" aria-label="Monitor summary" class="grid grid-cols-2 gap-px bg-line sm:grid-cols-4"></div>
-      </section>
+        <section aria-labelledby="overview-heading">
+          <div class="border-b border-line bg-panel/80 px-3 py-2">
+            <h2 id="overview-heading" class="text-xs font-bold uppercase tracking-[.14em] text-slate-200">Monitor overview</h2>
+          </div>
+          <div id="summary" aria-label="Monitor summary" class="grid grid-cols-2 gap-px bg-line sm:grid-cols-4"></div>
+        </section>
+      </div>
 
       <section class="overflow-hidden border border-line bg-panel/80">
         <div class="flex flex-wrap items-center justify-between gap-2 border-b border-line px-3 py-2">
