@@ -7,5 +7,4 @@ diagnostics/
 diagnostics-run-*/
 .gh-cache/
 notification.md
-state/current.json
-state/latest.json
+state/*/latest.json

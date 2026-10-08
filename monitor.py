@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Deterministic HYROX Anaheim ticket availability monitor."""
+"""Deterministic HYROX ticket availability monitor, one registry event per run."""
 
 from __future__ import annotations
 
@@ -16,10 +16,11 @@ from urllib.parse import urljoin
 
 from playwright.sync_api import Page, TimeoutError as PlaywrightTimeoutError, sync_playwright
 
-from schedule import CHECKS_PER_DAY, HISTORY_DAYS, block_summary_due, checks_stop_on, due, load_state
+from schedule import (
+    CHECKS_PER_DAY, HISTORY_DAYS, block_summary_due, default_event_key, event_due, event_zone,
+    load_events, state_dir,
+)
 
-
-EVENT_URL = "https://usa.hyrox.com/events/hyrox-anaheim-season-26-27-edyxxn"
 
 # Keep this list deliberately narrow. Matching happens after excluded ticket types
 # are rejected, so Charity/Adaptive/Pro/Spectator variants never leak in.
@@ -64,13 +65,24 @@ def classify(text: str) -> str:
     return "unknown"
 
 
-def parse_ticket_texts(blocks: Iterable[str]) -> dict[str, Ticket]:
-    matches: dict[str, list[str]] = {name: [] for name in TARGET_PATTERNS}
+def tracked_divisions(names: Iterable[str] | None = None) -> list[str]:
+    """An event's divisions_tracked, restricted to ones this monitor knows how to find."""
+    names = list(names or TARGET_PATTERNS)
+    unknown = [name for name in names if name not in TARGET_PATTERNS]
+    if unknown:
+        raise ValueError("No ticket pattern for division(s): " + ", ".join(unknown))
+    return names
+
+
+def parse_ticket_texts(blocks: Iterable[str], divisions: Iterable[str] | None = None) -> dict[str, Ticket]:
+    divisions = tracked_divisions(divisions)
+    matches: dict[str, list[str]] = {name: [] for name in divisions}
     for raw in blocks:
         text = normalize(raw)
         if not text or EXCLUDED.search(text):
             continue
-        for name, patterns in TARGET_PATTERNS.items():
+        for name in divisions:
+            patterns = TARGET_PATTERNS[name]
             if all(re.search(pattern, text, re.I) for pattern in patterns):
                 matches[name].append(text)
 
@@ -119,11 +131,12 @@ def candidate_blocks(page: Page) -> list[str]:
     return list(dict.fromkeys(blocks))
 
 
-def wizard_blocks(page: Page) -> list[str]:
-    """Traverse only the five explicitly requested Vivenu wizard branches."""
+def wizard_blocks(page: Page, divisions: Iterable[str]) -> list[str]:
+    """Traverse only the explicitly requested Vivenu wizard branches."""
     ticket_url = page.url
     blocks = []
-    for name, path in TARGET_WIZARD_PATHS.items():
+    for name in divisions:
+        path = TARGET_WIZARD_PATHS[name]
         page.goto(ticket_url, wait_until="domcontentloaded", timeout=60_000)
         page.wait_for_timeout(1_500)
         for step in path:
@@ -201,7 +214,9 @@ def capture(page: Page, directory: Path, error: Exception) -> None:
     page.screenshot(path=str(directory / "page.png"), full_page=True)
 
 
-def check(url: str, diagnostics: Path, headless: bool = True) -> dict[str, Ticket]:
+def check(url: str, diagnostics: Path, headless: bool = True,
+          divisions: Iterable[str] | None = None) -> dict[str, Ticket]:
+    divisions = tracked_divisions(divisions)
     with sync_playwright() as playwright:
         browser = playwright.chromium.launch(headless=headless)
         context = browser.new_context(
@@ -212,8 +227,8 @@ def check(url: str, diagnostics: Path, headless: bool = True) -> dict[str, Ticke
         page = context.new_page()
         try:
             open_ticket_shop(page, url)
-            blocks = wizard_blocks(page) if "usa.hyrox.com/tickets/" in page.url else candidate_blocks(page)
-            return parse_ticket_texts(blocks)
+            blocks = wizard_blocks(page, divisions) if "usa.hyrox.com/tickets/" in page.url else candidate_blocks(page)
+            return parse_ticket_texts(blocks, divisions)
         except Exception as error:
             capture(page, diagnostics, error)
             raise
@@ -221,9 +236,9 @@ def check(url: str, diagnostics: Path, headless: bool = True) -> dict[str, Ticke
             browser.close()
 
 
-def state_payload(tickets: dict[str, Ticket], url: str) -> dict:
+def state_payload(tickets: dict[str, Ticket], url: str, event: str) -> dict:
     return {
-        "event": "Centr HYROX Anaheim 2026",
+        "event": event,
         "source_url": url,
         "checked_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
         "tickets": {name: asdict(ticket) for name, ticket in tickets.items()},
@@ -283,7 +298,7 @@ def rolling_state(previous: dict | None, current: dict, limit: int | None = None
             ),
             "opening_transitions": sum(name in item.get("opened", []) for item in history),
         }
-        for name in TARGET_PATTERNS
+        for name in current["tickets"]
     }
     return {
         "meta": {
@@ -312,49 +327,65 @@ def record_openings(archive: dict | None, observation: dict) -> dict:
     return {"openings": openings}
 
 
+def issue_title(event: dict) -> str:
+    """One persistent notification issue per event; Anaheim's predates the registry."""
+    return f"🟢 HYROX {event['city']} ticket monitor"
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--url", default=os.getenv("HYROX_TICKET_URL", EVENT_URL))
-    parser.add_argument("--state", type=Path, default=Path("state/current.json"))
-    parser.add_argument("--runs", type=Path, default=Path("state/run-status.json"))
-    parser.add_argument("--openings", type=Path, default=Path("state/openings.json"))
-    parser.add_argument("--snapshot", type=Path, default=Path("state/latest.json"))
+    parser.add_argument("--event", default=default_event_key(), help="registry key in config/events.json")
+    parser.add_argument("--url", default=os.getenv("HYROX_TICKET_URL"),
+                        help="override the event's source_url")
+    parser.add_argument("--state-dir", type=Path, help="default: state/<event>")
     parser.add_argument("--diagnostics", type=Path, default=Path("diagnostics"))
     parser.add_argument("--schedule-guard", action="store_true")
     parser.add_argument("--headed", action="store_true")
     args = parser.parse_args()
 
+    event = load_events().get(args.event)
+    if not event:
+        print(f"Unknown event {args.event!r}", file=sys.stderr)
+        return 2
+    url = args.url or event.get("source_url")
+    if not url:
+        print(f"{args.event} has no source_url yet", file=sys.stderr)
+        return 2
+    directory = args.state_dir or state_dir(args.event)
+    directory.mkdir(parents=True, exist_ok=True)
+    state_path, openings_path = directory / "current.json", directory / "openings.json"
+    snapshot_path = directory / "latest.json"
+
     if args.schedule_guard:
-        should_run, reason = due(
-            load_state(args.state), runs=load_state(args.runs), stop_on=checks_stop_on()
-        )
+        should_run, reason = event_due(args.event, event)
         if not should_run:
             print(f"Skipping check: {reason}.")
             return 0
 
     try:
-        tickets = check(args.url, args.diagnostics, not args.headed)
+        tickets = check(url, args.diagnostics, not args.headed, event.get("divisions_tracked"))
     except Exception as error:
         print(f"Monitor failed: {error}", file=sys.stderr)
         return 2
 
-    previous = json.loads(args.state.read_text()) if args.state.exists() else None
-    current = state_payload(tickets, args.url)
+    previous = json.loads(state_path.read_text()) if state_path.exists() else None
+    current = state_payload(tickets, url, event["name"])
     delta = changes(previous, current)
-    args.snapshot.parent.mkdir(parents=True, exist_ok=True)
-    args.snapshot.write_text(json.dumps(current, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    snapshot_path.write_text(json.dumps(current, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     rolling = rolling_state(previous, current)
     # Preserve the intentionally human-oriented schema order: metadata first,
     # followed by chronological observations.
-    args.state.write_text(json.dumps(rolling, indent=2) + "\n", encoding="utf-8")
-    archive = json.loads(args.openings.read_text()) if args.openings.exists() else None
-    args.openings.write_text(
+    state_path.write_text(json.dumps(rolling, indent=2) + "\n", encoding="utf-8")
+    archive = json.loads(openings_path.read_text()) if openings_path.exists() else None
+    openings_path.write_text(
         json.dumps(record_openings(archive, current), indent=2) + "\n", encoding="utf-8"
     )
     Path(os.getenv("GITHUB_OUTPUT", os.devnull)).open("a", encoding="utf-8").write(
         f"initialized={'true' if previous else 'false'}\n"
         f"changed={'true' if delta else 'false'}\n"
-        f"block_summary_due={'true' if block_summary_due() else 'false'}\n"
+        f"block_summary_due={'true' if block_summary_due(tz=event_zone(event)) else 'false'}\n"
+        f"snapshot={snapshot_path}\n"
+        f"issue_title={issue_title(event)}\n"
         f"changes={json.dumps(delta)}\n"
     )
     print("\n".join(delta) if delta else "No availability changes detected.")

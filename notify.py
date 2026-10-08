@@ -38,7 +38,7 @@ def render_markdown(state: dict, changes: list[str], users: list[str]) -> str:
         callout = "> [!IMPORTANT]\n> " + "<br>\n> ".join(changes)
     else:
         heading = "## Scheduled status summary"
-        callout = "> [!NOTE]\n> The monitor completed the current Pacific-time check block."
+        callout = "> [!NOTE]\n> The monitor completed the current scheduled check block."
 
     rows = "\n".join(
         f"| {name.replace('|', chr(92) + '|')} | "
@@ -55,7 +55,7 @@ def render_markdown(state: dict, changes: list[str], users: list[str]) -> str:
 |---|---:|
 {rows}
 
-[Open the official HYROX Anaheim event page]({state['source_url']})
+[Open the official {state.get('event', 'HYROX')} event page]({state['source_url']})
 
 <sub>Checked {state['checked_at']} · Deterministic Python/Playwright monitor</sub>
 """
