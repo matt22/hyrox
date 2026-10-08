@@ -94,7 +94,9 @@
             <p id="event-subtitle" class="truncate text-xs font-semibold text-gray-300">Monitored divisions only</p>
           </div>
         </div>
-        <div class="flex items-center gap-2 text-xs font-semibold">
+        <div class="flex w-full flex-wrap items-center gap-2 text-xs font-semibold sm:w-auto">
+          <label for="event-picker" class="sr-only">Monitored event</label>
+          <select id="event-picker" class="hidden cursor-pointer border border-line bg-panel py-1.5 pl-2.5 pr-7 font-semibold text-slate-200 transition hover:border-cyan/50 focus:outline-none focus:ring-2 focus:ring-cyan/60"></select>
           <span id="last-updated" class="text-gray-300">Loading latest check…</span>
           <a id="event-link" href="#" target="_blank" rel="noreferrer" class="border border-line bg-panel px-2.5 py-1.5 font-semibold text-slate-200 transition hover:border-cyan/50 hover:text-cyan focus:outline-none focus:ring-2 focus:ring-cyan/60">Official event ↗</a>
         </div>
@@ -103,8 +105,6 @@
         <span class="absolute left-[30%] top-1/2 -translate-y-1/2" aria-hidden="true">HYROX</span>
         <span id="event-banner-city" class="absolute right-[30%] top-1/2 -translate-y-1/2" aria-hidden="true"></span>
       </div>
-
-      <nav id="event-tabs" aria-label="Monitored events" class="mb-3 hidden gap-px overflow-x-auto border border-line bg-line"></nav>
 
       <section id="run-alert" class="mb-3 hidden border border-coral/50 bg-coral/10 px-3 py-2.5" role="status" aria-live="polite">
         <div class="flex flex-wrap items-center justify-between gap-2">

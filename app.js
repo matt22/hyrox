@@ -350,16 +350,16 @@ function renderEventHeader(key, event, events) {
   });
 
   const active = activeEvents(events);
-  const tabs = document.querySelector('#event-tabs');
+  const picker = document.querySelector('#event-picker');
   if (active.length < 2) return;
-  tabs.innerHTML = active.map(([tabKey, tabEvent]) => {
-    const current = tabKey === key;
-    const href = tabEvent.is_default ? './' : `?event=${encodeURIComponent(tabKey)}`;
-    return `<a href="${href}" ${current ? 'aria-current="page"' : ''} class="flex-1 whitespace-nowrap px-3 py-2 text-xs font-bold uppercase tracking-[.14em] transition focus:outline-none focus:ring-2 focus:ring-inset focus:ring-cyan/60 ${current ? 'bg-panel text-white shadow-[inset_0_-2px_0_#27d3f2]' : 'bg-ink/80 text-gray-300 hover:bg-panel/80 hover:text-white'}">
-      ${escapeHtml(tabEvent.city)} <span class="font-semibold normal-case tracking-normal text-gray-400">${tabEvent.event_dates ? eventDatesCopy(tabEvent.event_dates) : tabEvent.year}</span>
-    </a>`;
-  }).join('');
-  tabs.classList.replace('hidden', 'flex');
+  picker.innerHTML = active.map(([optionKey, optionEvent]) => `<option value="${escapeHtml(optionKey)}" ${optionKey === key ? 'selected' : ''}>
+      ${escapeHtml(optionEvent.city)} · ${optionEvent.event_dates ? eventDatesCopy(optionEvent.event_dates) : optionEvent.year}
+    </option>`).join('');
+  picker.addEventListener('change', () => {
+    const chosen = events[picker.value];
+    window.location.assign(chosen.is_default ? window.location.pathname : `?event=${encodeURIComponent(picker.value)}`);
+  });
+  picker.classList.remove('hidden');
 }
 
 fetchJson('config/events.json')
