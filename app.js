@@ -1,4 +1,4 @@
-const state = { data: null };
+const state = { data: null, eventKey: null };
 
 function renderRunStatus(runStatus) {
   const badge = document.querySelector('#monitor-status');
@@ -255,12 +255,11 @@ function render(data, runStatus, openings = [], firstCompetitionDate = null) {
   const availableNow = categories.filter((name) => latest.tickets[name].status === 'available').length;
 
   document.querySelector('#last-updated').textContent = `Last Check ${formatTime(latest.checked_at)}`;
-  document.querySelector('#event-link').href = latest.source_url;
   document.querySelector('#range-label').textContent = `${displayHistory.length} attempts · Newest first · ${formatTime(displayHistory.at(-1).time)}–${formatTime(displayHistory[0].time)}`;
   document.querySelector('#summary').innerHTML = [
     summaryCard('Available now', `${availableNow}/${categories.length}`, availableNow ? 'Tickets detected' : 'All monitored tickets closed', availableNow ? 'text-lime' : 'text-coral'),
     summaryCard('Times found', openings.length, `All-time · ${meta.total_openings} opening${meta.total_openings === 1 ? '' : 's'} in window`, openings.length ? 'text-lime' : 'text-white'),
-    summaryCard('Checks logged', meta.observation_count, checkRateCopy(history), 'text-cyan', { href: 'https://github.com/matt22/hyrox/blob/main/state/current.json', label: 'Data Log ↗' }),
+    summaryCard('Checks logged', meta.observation_count, checkRateCopy(history), 'text-cyan', { href: logUrl(state.eventKey, 'current.json'), label: 'Data Log ↗' }),
     summaryCard('Divisions tracked', categories.length, 'Selected event categories', 'text-white')
   ].join('');
 
@@ -321,25 +320,72 @@ function render(data, runStatus, openings = [], firstCompetitionDate = null) {
 }
 
 const fetchJson = (url) => fetch(url, { cache: 'no-store' }).then((response) => {
-  if (!response.ok) throw new Error(`${url}: HTTP ${response.status}`);
+  if (!response.ok) throw Object.assign(new Error(`${url}: HTTP ${response.status}`), { status: response.status });
   return response.json();
 });
 
-Promise.all([
-  fetchJson('state/current.json'),
-  fetchJson('state/run-status.json').catch(() => null),
-  fetchJson('state/openings.json').catch(() => ({ openings: [] })),
-  fetchJson('config/events.json').catch(() => ({}))
-])
-  .then(([data, runStatus, archive, events]) => {
-    const event = Object.values(events).find((item) => item.is_default);
-    render(data, runStatus, archive.openings || [], event?.first_competition_date);
-    renderRunStatus(runStatus);
+const logUrl = (key, file) => `https://github.com/matt22/hyrox/blob/main/state/${key}/${file}`;
+
+const activeEvents = (events) => Object.entries(events)
+  .filter(([, event]) => event.status === 'active' && event.source_url);
+
+// ?event=<registry key> picks a monitored event; anything else falls back to the default.
+function chooseEvent(events) {
+  const active = activeEvents(events);
+  const requested = new URLSearchParams(window.location.search).get('event');
+  return active.find(([key]) => key === requested)
+    || active.find(([, event]) => event.is_default)
+    || active[0];
+}
+
+function renderEventHeader(key, event, events) {
+  document.title = `HYROX ${event.city} · Ticket Monitor`;
+  document.querySelector('#event-title').textContent = `${event.city} Ticket Monitor`;
+  document.querySelector('#event-subtitle').textContent = `${event.name} · monitored divisions only`;
+  document.querySelector('#event-banner').setAttribute('aria-label', `HYROX ${event.city}`);
+  document.querySelector('#event-banner-city').textContent = event.city;
+  document.querySelector('#event-link').href = event.source_url;
+  document.querySelectorAll('[data-log-link]').forEach((link) => {
+    link.href = logUrl(key, link.dataset.logLink);
+  });
+
+  const active = activeEvents(events);
+  const tabs = document.querySelector('#event-tabs');
+  if (active.length < 2) return;
+  tabs.innerHTML = active.map(([tabKey, tabEvent]) => {
+    const current = tabKey === key;
+    const href = tabEvent.is_default ? './' : `?event=${encodeURIComponent(tabKey)}`;
+    return `<a href="${href}" ${current ? 'aria-current="page"' : ''} class="flex-1 whitespace-nowrap px-3 py-2 text-xs font-bold uppercase tracking-[.14em] transition focus:outline-none focus:ring-2 focus:ring-inset focus:ring-cyan/60 ${current ? 'bg-panel text-white shadow-[inset_0_-2px_0_#27d3f2]' : 'bg-ink/80 text-gray-300 hover:bg-panel/80 hover:text-white'}">
+      ${escapeHtml(tabEvent.city)} <span class="font-semibold normal-case tracking-normal text-gray-400">${tabEvent.event_dates ? eventDatesCopy(tabEvent.event_dates) : tabEvent.year}</span>
+    </a>`;
+  }).join('');
+  tabs.classList.replace('hidden', 'flex');
+}
+
+fetchJson('config/events.json')
+  .then((events) => {
+    const [key, event] = chooseEvent(events) || [];
+    if (!key) throw new Error('no active event in config/events.json');
+    state.eventKey = key;
+    renderEventHeader(key, event, events);
     renderUpcoming(events);
+    return Promise.all([
+      fetchJson(`state/${key}/current.json`),
+      fetchJson(`state/${key}/run-status.json`).catch(() => null),
+      fetchJson(`state/${key}/openings.json`).catch(() => ({ openings: [] }))
+    ]).then(([data, runStatus, archive]) => {
+      render(data, runStatus, archive.openings || [], event.first_competition_date);
+      renderRunStatus(runStatus);
+    }).catch((error) => {
+      // A newly activated event has no state until its first check is committed.
+      if (error.status !== 404) throw error;
+      document.querySelector('#last-updated').textContent = 'No checks yet';
+      document.querySelector('#summary').innerHTML = `<div class="col-span-full bg-panel p-4 text-sm font-semibold text-gray-300">${escapeHtml(event.name)} is being monitored; its first check has not been recorded yet.</div>`;
+    });
   })
   .catch((error) => {
     document.querySelector('#last-updated').textContent = 'Data unavailable';
-    document.querySelector('#summary').innerHTML = `<div class="col-span-full bg-panel p-4 text-sm text-coral">Could not load state/current.json (${error.message}). Serve this repository through a local web server.</div>`;
+    document.querySelector('#summary').innerHTML = `<div class="col-span-full bg-panel p-4 text-sm text-coral">Could not load monitor data (${escapeHtml(error.message)}). Serve this repository through a local web server.</div>`;
   });
 
 function closePopovers(exceptId = null) {
