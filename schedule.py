@@ -6,7 +6,9 @@ best-effort basis, far too unevenly to hold to a fixed number of runs a day.
 The Cloudflare Worker in cloudflare/ dispatches it instead, and this module
 decides again, on arrival, whether the run should go ahead: one attempt per
 Pacific hour in RUN_HOURS, which caps the workflow at eight runs a day however
-it was triggered.
+it was triggered. Every active event in config/events.json is guarded
+separately, in its own timezone and run hours, against its own state under
+state/<event-key>/.
 
 Deliberately free of third-party imports, so the workflow can evaluate the
 guard immediately after checkout and turn a run away before installing
@@ -17,6 +19,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -41,6 +44,8 @@ MAX_ATTEMPTS_PER_HOUR = 1
 # midnight Pacific that day): openings that late are no use to us.
 STOP_DAYS_BEFORE_COMPETITION = 5
 EVENTS_CONFIG = Path(__file__).resolve().parent / "config/events.json"
+# Each event keeps its own current.json, run-status.json and openings.json here.
+STATE_ROOT = Path("state")
 
 
 def now_in_zone(tz: ZoneInfo, now: datetime | None = None) -> datetime:
@@ -88,21 +93,49 @@ def recorded_hours(state: dict | None, tz: ZoneInfo = PACIFIC) -> set[str]:
     }
 
 
-def attempts_in_hour(runs: dict | None, key: str) -> int:
+def attempts_in_hour(runs: dict | None, key: str, tz: ZoneInfo = PACIFIC) -> int:
     """How many workflow attempts have already been logged for a tz-local hour."""
     if not runs:
         return 0
     return sum(
         1 for item in runs.get("history") or []
         if isinstance(item, dict) and item.get("recorded_at")
-        and hour_key(item["recorded_at"]) == key
+        and hour_key(item["recorded_at"], tz) == key
     )
 
 
-def checks_stop_on(config: Path = EVENTS_CONFIG) -> date | None:
-    """The tz-local date checks stop for the default event, if it has one."""
-    events = load_state(config) or {}
-    event = next((item for item in events.values() if item.get("is_default")), {})
+def load_events(config: Path = EVENTS_CONFIG) -> dict:
+    return load_state(config) or {}
+
+
+def default_event_key(config: Path = EVENTS_CONFIG) -> str | None:
+    return next((key for key, item in load_events(config).items() if item.get("is_default")), None)
+
+
+def active_events(config: Path = EVENTS_CONFIG) -> dict:
+    """Events the monitor checks: marked active and with a ticket shop to scrape."""
+    return {
+        key: item for key, item in load_events(config).items()
+        if item.get("status") == "active" and item.get("source_url")
+    }
+
+
+def state_dir(key: str, root: Path = STATE_ROOT) -> Path:
+    return root / key
+
+
+def event_zone(event: dict) -> ZoneInfo:
+    return ZoneInfo(event.get("timezone") or PACIFIC.key)
+
+
+def event_run_hours(event: dict) -> tuple[int, ...]:
+    return tuple(event.get("run_hours") or RUN_HOURS)
+
+
+def checks_stop_on(config: Path = EVENTS_CONFIG, key: str | None = None) -> date | None:
+    """The tz-local date checks stop for an event (the default one if no key), if it has one."""
+    events = load_events(config)
+    event = events.get(key or default_event_key(config) or "", {})
     first_day = event.get("first_competition_date")
     if not first_day:
         return None
@@ -129,7 +162,7 @@ def due(state: dict | None, now: datetime | None = None, runs: dict | None = Non
         return False, f"the {local:%H:00} {tz.key} check is already recorded"
     # Only reached when the hour has no observation, so any logged attempt for
     # it failed. The hour is spent either way.
-    attempts = attempts_in_hour(runs, key)
+    attempts = attempts_in_hour(runs, key, tz)
     if attempts >= MAX_ATTEMPTS_PER_HOUR:
         return False, f"the {local:%H:00} {tz.key} hour already used its attempt"
     return True, f"no check recorded yet for {local:%H:00} {tz.key}"
@@ -143,21 +176,38 @@ def load_state(path: Path) -> dict | None:
         return None
 
 
+def event_due(key: str, event: dict, now: datetime | None = None, *,
+              config: Path = EVENTS_CONFIG, root: Path = STATE_ROOT) -> tuple[bool, str]:
+    """`due` for one registry event, against that event's own state and schedule."""
+    directory = state_dir(key, root)
+    return due(
+        load_state(directory / "current.json"), now, load_state(directory / "run-status.json"),
+        tz=event_zone(event), run_hours=event_run_hours(event),
+        stop_on=checks_stop_on(config, key),
+    )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--state", type=Path, default=Path("state/current.json"))
-    parser.add_argument("--runs", type=Path, default=Path("state/run-status.json"))
+    parser.add_argument("--event", help="guard only this event key (default: every active event)")
     parser.add_argument("--force", action="store_true", help="bypass the guard (manual runs)")
     args = parser.parse_args()
 
-    if args.force:
-        should_run, reason = True, "manually dispatched"
-    else:
-        should_run, reason = due(
-            load_state(args.state), runs=load_state(args.runs), stop_on=checks_stop_on()
-        )
-    print(f"due={'true' if should_run else 'false'}")
-    print(f"reason={reason}")
+    events = active_events()
+    if args.event:
+        if args.event not in events:
+            raise SystemExit(f"{args.event!r} is not an active event in {EVENTS_CONFIG.name}")
+        events = {args.event: events[args.event]}
+
+    due_keys = []
+    for key, event in events.items():
+        should_run, reason = (True, "manually dispatched") if args.force else event_due(key, event)
+        if should_run:
+            due_keys.append(key)
+        # Reasons go to stderr so stdout stays clean key=value lines for $GITHUB_OUTPUT.
+        print(f"{key}: {'due' if should_run else 'skip'} — {reason}", file=sys.stderr)
+    print(f"due={'true' if due_keys else 'false'}")
+    print(f"events={json.dumps(due_keys)}")
     return 0
 
 

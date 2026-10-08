@@ -8,8 +8,8 @@ from pathlib import Path
 import pytest
 
 from schedule import (
-    CHECKS_PER_DAY, HISTORY_DAYS, MAX_ATTEMPTS_PER_HOUR, PACIFIC, RUN_HOURS, checks_stop_on,
-    due, hour_key, scheduled_now,
+    CHECKS_PER_DAY, HISTORY_DAYS, MAX_ATTEMPTS_PER_HOUR, PACIFIC, RUN_HOURS, active_events,
+    checks_stop_on, due, event_due, event_run_hours, event_zone, hour_key, scheduled_now,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -222,3 +222,60 @@ def test_missing_competition_date_never_stops_checks(tmp_path):
     config.write_text(json.dumps({"x": {"is_default": True}}))
     assert checks_stop_on(config) is None
     assert checks_stop_on(tmp_path / "missing.json") is None
+
+
+@pytest.mark.parametrize("day", ["2026-07-15", "2026-01-15"], ids=["PDT", "PST"])
+@pytest.mark.parametrize("key", sorted(active_events()))
+def test_worker_cron_reaches_every_active_events_run_hours_in_its_own_zone(key, day):
+    """Each active event is scheduled in its own timezone, which may not observe DST."""
+    event = active_events()[key]
+    zone, run_hours = event_zone(event), event_run_hours(event)
+    reached = {
+        datetime.fromisoformat(f"{day}T{utc_hour:02d}:{minute:02d}:00+00:00").astimezone(zone).hour
+        for utc_hour, minute in cron_arrivals()
+    }
+    missing = sorted(set(run_hours) - reached)
+    assert not missing, f"the Worker never ticks during {key}'s {zone.key} hour(s) {missing}"
+
+
+def write_events(tmp_path, **events) -> Path:
+    config = tmp_path / "events.json"
+    config.write_text(json.dumps(events))
+    return config
+
+
+def test_only_active_events_with_a_ticket_shop_are_monitored(tmp_path):
+    config = write_events(
+        tmp_path,
+        live={"status": "active", "source_url": "https://example.com"},
+        staged={"status": "upcoming", "source_url": None},
+        broken={"status": "active", "source_url": None},
+    )
+    assert list(active_events(config)) == ["live"]
+
+
+def test_each_event_is_guarded_against_its_own_state(tmp_path):
+    phoenix = {"timezone": "America/Phoenix", "run_hours": [10], "first_competition_date": "2027-02-25"}
+    config = write_events(tmp_path, phoenix=phoenix)
+    # 10:05 MST on a winter day is 9:05 PST, outside Anaheim's default schedule.
+    now = datetime(2027, 1, 10, 17, 5, tzinfo=timezone.utc)
+    assert event_due("phoenix", phoenix, now, config=config, root=tmp_path)[0] is True
+
+    (tmp_path / "phoenix").mkdir()
+    (tmp_path / "phoenix/current.json").write_text(json.dumps(state_checked_at(now.isoformat())))
+    assert event_due("phoenix", phoenix, now, config=config, root=tmp_path)[0] is False
+    assert event_due("other", phoenix, now, config=config, root=tmp_path)[0] is True
+
+
+def test_failed_attempts_are_counted_in_the_events_own_zone():
+    from zoneinfo import ZoneInfo
+
+    phoenix = ZoneInfo("America/Phoenix")
+    # 10:05 MST is 9:05 PST: the attempt belongs to Phoenix's 10:00 hour.
+    attempted = {"history": [{"recorded_at": "2027-01-10T17:05:00+00:00"}]}
+    now = datetime(2027, 1, 10, 17, 40, tzinfo=timezone.utc)
+    assert due(None, now, runs=attempted, tz=phoenix, run_hours=(10,))[0] is False
+
+
+def test_phoenix_checks_stop_five_days_before_its_first_competition_day():
+    assert checks_stop_on(key="phoenix-2027") == date(2027, 2, 20)
