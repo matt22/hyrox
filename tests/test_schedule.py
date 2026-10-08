@@ -13,7 +13,7 @@ from schedule import (
 )
 
 ROOT = Path(__file__).resolve().parents[1]
-WORKFLOW = ROOT / ".github/workflows/monitor.yml"
+RECORD_RUN = ROOT / "record_run.py"
 WRANGLER = ROOT / "cloudflare/wrangler.toml"
 # The hourly cron is deliberately built to land exactly once per Pacific run
 # hour, not with spare ticks to fall back on: Cloudflare does not retry a tick
@@ -165,9 +165,9 @@ def test_due_accepts_a_non_pacific_zone_independently_of_the_pacific_default():
     assert due(None, denver_moment, tz=denver, run_hours=(9,))[0] is False
 
 
-def test_workflow_run_status_cap_matches_the_schedule_constants():
-    """The workflow hardcodes this so it still logs when schedule.py is broken."""
-    literal = re.search(r"^\s*limit = (\d+)\b", WORKFLOW.read_text(), re.M)
+def test_run_status_cap_matches_the_schedule_constants():
+    """record_run.py hardcodes this so it still logs when schedule.py is broken."""
+    literal = re.search(r"^LIMIT = (\d+)\b", RECORD_RUN.read_text(), re.M)
     assert literal, "the run-status retention limit is no longer a plain literal"
     assert int(literal.group(1)) == CHECKS_PER_DAY * (HISTORY_DAYS + 1)
 
