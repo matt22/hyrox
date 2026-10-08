@@ -29,7 +29,7 @@
     "venue": "State Farm Stadium, 1 Cardinals Dr, Glendale, AZ 85305",
     "event_dates": "2027-02-25 to 2027-02-28",
     "event_url": "https://hyrox.com/event/inbody-hyrox-phoenix-26-27/",
-    "source_url": null,
+    "source_url": "https://usa.hyrox.com/events/hyrox-phoenix-season-26-27-f5qrtn",
     "first_competition_date": "2027-02-25",
     "first_ticket_sale_date": "2026-10-08",
     "first_ticket_sale_date_confirmed": true,
@@ -41,7 +41,7 @@
       "Mixed Open Relay"
     ],
     "run_hours": [0, 1, 7, 8, 9, 10, 11, 12],
-    "status": "upcoming",
+    "status": "active",
     "notify_users": ["matt22"],
     "is_default": false
   },
