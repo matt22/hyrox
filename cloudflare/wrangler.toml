@@ -17,7 +17,9 @@ preview_urls = false
 # the current season and the Worker returns immediately, spending nothing.
 # `test_worker_cron_reaches_every_run_hour_in_both_offsets` in
 # tests/test_schedule.py checks this field against RUN_HOURS directly, so a
-# change to either one without the other fails CI.
+# change to either one without the other fails CI, and
+# test_worker_cron_reaches_every_active_events_run_hours_in_its_own_zone does
+# the same for every active event in config/events.json.
 #
 # 10 invocations a day against a 100,000/day free-plan allowance, and one of
 # five free cron triggers (the free plan caps a Worker at 5, but a single
