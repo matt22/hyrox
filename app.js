@@ -178,7 +178,32 @@ const divisionCode = (name) => {
   return `${words[0][0]}${words.at(-1)[0]}`.toUpperCase();
 };
 
-// One row per Pacific day and one chip per check, with every division in a fixed
+// Newest days stay open; older ones load a week at a time so a season of openings stays short.
+const OPENING_DAYS_SHOWN = 3;
+const OPENING_DAYS_STEP = 7;
+// Checks run hourly, so a longer gap means a missed or closed check and starts a new run.
+const OPENING_RUN_GAP_MS = 90 * 60 * 1000;
+
+const availableKey = (observation, categories) => categories
+  .filter((name) => observation.tickets[name]?.status === 'available')
+  .join('|');
+
+// Collapse back-to-back checks that found the same divisions into one run (newest first).
+function openingRuns(observations, categories) {
+  const runs = [];
+  observations.forEach((observation) => {
+    const run = runs.at(-1);
+    const previous = run?.at(-1);
+    const continues = previous
+      && availableKey(previous, categories) === availableKey(observation, categories)
+      && Date.parse(previous.checked_at) - Date.parse(observation.checked_at) <= OPENING_RUN_GAP_MS;
+    if (continues) run.push(observation);
+    else runs.push([observation]);
+  });
+  return runs;
+}
+
+// One row per Pacific day and one chip per run of checks, with every division in a fixed
 // slot (lit when available), so a check that finds many divisions stays one chip wide.
 function renderOpenings(openings, history, firstCompetitionDate, categories) {
   const list = document.querySelector('#openings-list');
@@ -196,15 +221,46 @@ function renderOpenings(openings, history, firstCompetitionDate, categories) {
     if (!days.has(day)) days.set(day, []);
     days.get(day).push(observation);
   });
-  list.innerHTML = [...days].map(([day, observations]) => `
-    <div class="grid grid-cols-[6.5rem_minmax(0,1fr)] items-start gap-3 px-3 py-2">
-      <span class="pt-1 text-xs font-bold leading-4 text-white">${day}<span class="block text-[11px] font-semibold text-cyan">${daysOutCopy(observations[0].checked_at, firstCompetitionDate)}</span></span>
-      <div class="flex flex-wrap gap-1.5">${observations.map((observation) => `<span title="${retained.has(observation.checked_at) ? 'Also in history above' : 'Archived'}" class="inline-flex items-center gap-1 border border-lime/25 bg-lime/10 py-0.5 pl-2 pr-0.5 text-[11px] font-bold">
-          <span class="mr-1 whitespace-nowrap text-slate-200">${formatClock(observation.checked_at)}</span>${categories.map((name) => observation.tickets[name]?.status === 'available'
-            ? `<button type="button" data-category="${escapeHtml(name)}" data-time="${observation.checked_at}" title="${escapeHtml(name)}" class="px-1 py-0.5 text-lime transition hover:bg-lime/20 focus:outline-none focus:ring-2 focus:ring-cyan/60">${divisionCode(name)}</button>`
+
+  const runChip = (run) => {
+    const [newest, oldest] = [run[0], run.at(-1)];
+    const times = run.length === 1
+      ? formatClock(newest.checked_at)
+      : `${formatClock(oldest.checked_at)}–${formatClock(newest.checked_at)}<span class="ml-1 text-gray-400">×${run.length}</span>`;
+    const title = run.length === 1
+      ? (retained.has(newest.checked_at) ? 'Also in history above' : 'Archived')
+      : `${run.length} consecutive checks · codes open the latest`;
+    return `<span title="${title}" class="inline-flex items-center gap-1 border border-lime/25 bg-lime/10 py-0.5 pl-2 pr-0.5 text-[11px] font-bold">
+          <span class="mr-1 whitespace-nowrap text-slate-200">${times}</span>${categories.map((name) => newest.tickets[name]?.status === 'available'
+            ? `<button type="button" data-category="${escapeHtml(name)}" data-time="${newest.checked_at}" title="${escapeHtml(name)}" class="px-1 py-0.5 text-lime transition hover:bg-lime/20 focus:outline-none focus:ring-2 focus:ring-cyan/60">${divisionCode(name)}</button>`
             : `<span title="${escapeHtml(name)} · not found" class="px-1 py-0.5 text-slate-500/50">${divisionCode(name)}</span>`).join('')}
-        </span>`).join('')}</div>
-    </div>`).join('');
+        </span>`;
+  };
+
+  list.innerHTML = [...days].map(([day, observations], index) => `
+    <div data-opening-day="${index}" class="${index >= OPENING_DAYS_SHOWN ? 'hidden ' : ''}grid grid-cols-[6.5rem_minmax(0,1fr)] items-start gap-3 px-3 py-2">
+      <span class="pt-1 text-xs font-bold leading-4 text-white">${day}<span class="block text-[11px] font-semibold text-cyan">${daysOutCopy(observations[0].checked_at, firstCompetitionDate)}</span></span>
+      <div class="flex flex-wrap gap-1.5">${openingRuns(observations, categories).map(runChip).join('')}</div>
+    </div>`).join('') + (days.size > OPENING_DAYS_SHOWN ? `
+    <button type="button" id="openings-toggle" class="w-full px-3 py-2 text-left text-[11px] font-bold uppercase tracking-[.12em] text-gray-300 transition hover:bg-white/[.03] hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-cyan/60"></button>` : '');
+
+  const toggle = list.querySelector('#openings-toggle');
+  if (!toggle) return;
+  let shown = OPENING_DAYS_SHOWN;
+  const update = () => {
+    list.querySelectorAll('[data-opening-day]').forEach((row) => row.classList.toggle('hidden', Number(row.dataset.openingDay) >= shown));
+    const remaining = days.size - shown;
+    const next = Math.min(OPENING_DAYS_STEP, remaining);
+    toggle.textContent = remaining > 0
+      ? `Show ${next} more day${next === 1 ? '' : 's'} ↓ · ${remaining} earlier`
+      : 'Show less ↑';
+  };
+  toggle.addEventListener('click', () => {
+    shown = shown >= days.size ? OPENING_DAYS_SHOWN : shown + OPENING_DAYS_STEP;
+    update();
+    if (shown === OPENING_DAYS_SHOWN) list.closest('section').scrollIntoView({ block: 'nearest' });
+  });
+  update();
 }
 
 // Registry dates are calendar dates, so format them in UTC to keep the day from shifting.
