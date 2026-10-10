@@ -3,24 +3,24 @@
     "total_openings": 0,
     "retention_days": 2,
     "max_observations": 16,
-    "observation_count": 14,
+    "observation_count": 15,
     "window_start": "2026-10-08T23:41:53+00:00",
-    "window_end": "2026-10-10T16:08:17+00:00",
+    "window_end": "2026-10-10T17:08:10+00:00",
     "openings": {
       "Men's Open Singles": {
-        "available_observations": 14,
+        "available_observations": 15,
         "opening_transitions": 0
       },
       "Women's Open Singles": {
-        "available_observations": 14,
+        "available_observations": 15,
         "opening_transitions": 0
       },
       "Women's Open Doubles": {
-        "available_observations": 14,
+        "available_observations": 15,
         "opening_transitions": 0
       },
       "Mixed Open Doubles": {
-        "available_observations": 14,
+        "available_observations": 15,
         "opening_transitions": 0
       },
       "Mixed Open Relay": {
@@ -398,6 +398,34 @@
       "event": "InBody HYROX Phoenix 2027",
       "source_url": "https://usa.hyrox.com/events/hyrox-phoenix-season-26-27-f5qrtn",
       "checked_at": "2026-10-10T16:08:17+00:00",
+      "tickets": {
+        "Men's Open Singles": {
+          "status": "available",
+          "evidence": "Men's Open Singles HYROX MEN | Thursday Thursday February 25 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $218.33 | Men's Open Singles UNAVAILABLE HYROX MEN | Friday Friday February 26 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $218.33 | Men's Open Singles HYROX MEN | Saturday "
+        },
+        "Women's Open Singles": {
+          "status": "available",
+          "evidence": "Women's Open Singles HYROX WOMEN | Thursday Thursday February 25 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $218.33 | Women's Open Singles UNAVAILABLE HYROX WOMEN | Friday Friday February 26 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $218.33 | Women's Open Singles HYROX WOMEN"
+        },
+        "Women's Open Doubles": {
+          "status": "available",
+          "evidence": "Women's Open Doubles HYROX DOUBLES WOMEN | Thursday Thursday February 25 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. Price per person plus service fee - 2 tickets for a Doubles Team will be automatically added to your cart. Read more $415.35 | Women's Open Doubles UNAVAILABLE HYROX DOUBLES WOMEN | Friday Friday February 26 | Please check the event page for the provisional start windows."
+        },
+        "Mixed Open Doubles": {
+          "status": "available",
+          "evidence": "Mixed Open Doubles HYROX DOUBLES MIXED | Thursday Thursday February 25 | Please check the event page for the provisional start windows. World Championship Qualification available for ALL age categories. Price per person plus service fee - 2 tickets for a Doubles Team will be automatically added to your cart. Please note a Mixed Doubles Team must be made up of 1 Male and 1 Female. Read more $415.35 | Mixed Open Doubles UNAVAILABLE HYROX DOUBLES MIXED | Friday Friday February 26 | Please check the"
+        },
+        "Mixed Open Relay": {
+          "status": "unavailable",
+          "evidence": "Mixed Open Relay UNAVAILABLE HYROX MIXED RELAY | Friday Friday February 26 | Please check the event page for the provisional start windows. Please note a Mixed Relay Team must be made up of 2 Male and 2 Female. Price per person plus service fee - 4 tickets for a Relay Team will be automatically added to your cart. Read more $447.30"
+        }
+      },
+      "opened": []
+    },
+    {
+      "event": "InBody HYROX Phoenix 2027",
+      "source_url": "https://usa.hyrox.com/events/hyrox-phoenix-season-26-27-f5qrtn",
+      "checked_at": "2026-10-10T17:08:10+00:00",
       "tickets": {
         "Men's Open Singles": {
           "status": "available",
