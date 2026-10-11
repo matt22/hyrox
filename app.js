@@ -434,13 +434,17 @@ function renderPreSale(event) {
   document.querySelectorAll('[data-monitor-only]').forEach((section) => section.classList.add('hidden'));
   document.querySelector('#overview-heading').textContent = 'Before tickets go on sale';
   document.querySelector('#last-updated').textContent = 'Not on sale yet';
+  const badge = document.querySelector('#monitor-status');
+  badge.classList.remove('border-lime/25', 'bg-lime/10', 'text-lime');
+  badge.classList.add('border-cyan/25', 'bg-cyan/10', 'text-cyan');
+  badge.innerHTML = '<span class="h-1.5 w-1.5 rounded-full bg-cyan shadow-[0_0_8px_#27d3f2]"></span>Pre-sale';
   const sale = event.first_ticket_sale_date;
   const saleNote = !sale ? 'Date not announced'
     : event.first_ticket_sale_date_confirmed ? 'Confirmed by HYROX' : 'Estimate · not yet announced';
   document.querySelector('#summary').innerHTML = [
     summaryCard('Tickets on sale', sale ? `${event.first_ticket_sale_date_confirmed ? '' : '~'}${formatCalendarDate(sale, { year: 'numeric' })}` : 'TBA', saleNote, 'text-cyan'),
-    summaryCard('Race weekend', event.event_dates ? eventDatesCopy(event.event_dates) : 'TBA', escapeHtml(event.venue || eventPlaceCopy(event))),
-    summaryCard('Monitoring', 'Pending', 'Checks start once the ticket shop opens', 'text-gray-300', { href: event.event_url, label: 'Event page ↗' }),
+    summaryCard('Race weekend', event.event_dates ? eventDatesCopy(event.event_dates) : 'TBA', escapeHtml(event.venue?.split(',')[0] || eventPlaceCopy(event))),
+    summaryCard('Monitoring', 'Pending', 'Starts when the shop opens', 'text-gray-300'),
     summaryCard('Divisions tracked', event.divisions_tracked.length, 'Selected event categories')
   ].join('');
 }
