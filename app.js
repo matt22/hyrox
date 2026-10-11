@@ -392,10 +392,11 @@ const fetchJson = (url) => fetch(url, { cache: 'no-store' }).then((response) => 
 
 const logUrl = (key, file) => `https://github.com/matt22/hyrox/blob/main/state/${key}/${file}`;
 
+// Active events get a dashboard page; one without a source_url is pre-sale and not checked yet.
 const activeEvents = (events) => Object.entries(events)
-  .filter(([, event]) => event.status === 'active' && event.source_url);
+  .filter(([, event]) => event.status === 'active');
 
-// ?event=<registry key> picks a monitored event; anything else falls back to the default.
+// ?event=<registry key> picks an event page; anything else falls back to the default.
 function chooseEvent(events) {
   const active = activeEvents(events);
   const requested = new URLSearchParams(window.location.search).get('event');
@@ -407,10 +408,10 @@ function chooseEvent(events) {
 function renderEventHeader(key, event, events) {
   document.title = `HYROX ${event.city} · Ticket Monitor`;
   document.querySelector('#event-title').textContent = `${event.city} Ticket Monitor`;
-  document.querySelector('#event-subtitle').textContent = `${event.name} · monitored divisions only`;
+  document.querySelector('#event-subtitle').textContent = `${event.name} · ${event.source_url ? 'monitored divisions only' : 'tickets not on sale yet'}`;
   document.querySelector('#event-banner').setAttribute('aria-label', `HYROX ${event.city}`);
   document.querySelector('#event-banner-city').textContent = event.city;
-  document.querySelector('#event-link').href = event.source_url;
+  document.querySelector('#event-link').href = event.source_url || event.event_url;
   document.querySelectorAll('[data-log-link]').forEach((link) => {
     link.href = logUrl(key, link.dataset.logLink);
   });
@@ -428,6 +429,22 @@ function renderEventHeader(key, event, events) {
   picker.classList.remove('hidden');
 }
 
+// Until the shop opens there is nothing to check, so show the sale timing in place of history.
+function renderPreSale(event) {
+  document.querySelectorAll('[data-monitor-only]').forEach((section) => section.classList.add('hidden'));
+  document.querySelector('#overview-heading').textContent = 'Before tickets go on sale';
+  document.querySelector('#last-updated').textContent = 'Not on sale yet';
+  const sale = event.first_ticket_sale_date;
+  const saleNote = !sale ? 'Date not announced'
+    : event.first_ticket_sale_date_confirmed ? 'Confirmed by HYROX' : 'Estimate · not yet announced';
+  document.querySelector('#summary').innerHTML = [
+    summaryCard('Tickets on sale', sale ? `${event.first_ticket_sale_date_confirmed ? '' : '~'}${formatCalendarDate(sale, { year: 'numeric' })}` : 'TBA', saleNote, 'text-cyan'),
+    summaryCard('Race weekend', event.event_dates ? eventDatesCopy(event.event_dates) : 'TBA', escapeHtml(event.venue || eventPlaceCopy(event))),
+    summaryCard('Monitoring', 'Pending', 'Checks start once the ticket shop opens', 'text-gray-300', { href: event.event_url, label: 'Event page ↗' }),
+    summaryCard('Divisions tracked', event.divisions_tracked.length, 'Selected event categories')
+  ].join('');
+}
+
 fetchJson('config/events.json')
   .then((events) => {
     const [key, event] = chooseEvent(events) || [];
@@ -435,6 +452,7 @@ fetchJson('config/events.json')
     state.eventKey = key;
     renderEventHeader(key, event, events);
     renderUpcoming(events);
+    if (!event.source_url) return renderPreSale(event);
     return Promise.all([
       fetchJson(`state/${key}/current.json`),
       fetchJson(`state/${key}/run-status.json`).catch(() => null),
