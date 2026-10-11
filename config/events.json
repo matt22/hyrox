@@ -54,6 +54,7 @@
     "event_dates": "2027-03-12 to 2027-03-14",
     "event_url": "https://hyrox.com/event/hyrox-las-vegas-26-27/",
     "source_url": null,
+    "first_competition_date": "2027-03-12",
     "first_ticket_sale_date": "2026-11-20",
     "first_ticket_sale_date_confirmed": false,
     "divisions_tracked": [
@@ -64,7 +65,7 @@
       "Mixed Open Relay"
     ],
     "run_hours": [0, 1, 7, 8, 9, 10, 11, 12],
-    "status": "upcoming",
+    "status": "active",
     "notify_users": ["matt22"],
     "is_default": false
   },
