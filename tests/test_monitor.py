@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 import pytest
 
 from monitor import (
-    StructureError, changes, issue_title, parse_ticket_texts, record_openings, requested_history_limit,
+    StructureError, changes, parse_ticket_texts, record_openings, requested_history_limit,
     rolling_state,
 )
 from schedule import CHECKS_PER_DAY, HISTORY_DAYS, block_summary_due
@@ -135,8 +135,3 @@ def test_an_event_can_track_a_subset_of_divisions():
 def test_an_untracked_division_name_is_rejected_rather_than_ignored():
     with pytest.raises(ValueError, match="Men's Elite"):
         parse_ticket_texts(BLOCKS, ["Men's Elite Singles"])
-
-
-def test_each_event_gets_its_own_issue_and_anaheim_keeps_its_existing_one():
-    assert issue_title({"city": "Anaheim"}) == "🟢 HYROX Anaheim ticket monitor"
-    assert issue_title({"city": "Phoenix"}) == "🟢 HYROX Phoenix ticket monitor"

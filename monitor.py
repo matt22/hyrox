@@ -17,8 +17,7 @@ from urllib.parse import urljoin
 from playwright.sync_api import Page, TimeoutError as PlaywrightTimeoutError, sync_playwright
 
 from schedule import (
-    CHECKS_PER_DAY, HISTORY_DAYS, block_summary_due, default_event_key, event_due, event_zone,
-    load_events, state_dir,
+    CHECKS_PER_DAY, HISTORY_DAYS, default_event_key, event_due, load_events, state_dir,
 )
 
 
@@ -327,11 +326,6 @@ def record_openings(archive: dict | None, observation: dict) -> dict:
     return {"openings": openings}
 
 
-def issue_title(event: dict) -> str:
-    """One persistent notification issue per event; Anaheim's predates the registry."""
-    return f"🟢 HYROX {event['city']} ticket monitor"
-
-
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--event", default=default_event_key(), help="registry key in config/events.json")
@@ -383,9 +377,7 @@ def main() -> int:
     Path(os.getenv("GITHUB_OUTPUT", os.devnull)).open("a", encoding="utf-8").write(
         f"initialized={'true' if previous else 'false'}\n"
         f"changed={'true' if delta else 'false'}\n"
-        f"block_summary_due={'true' if block_summary_due(tz=event_zone(event)) else 'false'}\n"
         f"snapshot={snapshot_path}\n"
-        f"issue_title={issue_title(event)}\n"
         f"changes={json.dumps(delta)}\n"
     )
     print("\n".join(delta) if delta else "No availability changes detected.")

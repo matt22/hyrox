@@ -33,6 +33,7 @@ jobs:
     timeout-minutes: 5
     outputs:
       events: ${{ steps.guard.outputs.events }}
+      summary_due: ${{ steps.guard.outputs.summary_due }}
     env:
       RUN_ID: ${{ github.run_id }}
       RUN_ATTEMPT: ${{ github.run_attempt }}
@@ -65,8 +66,8 @@ jobs:
     timeout-minutes: 15
     strategy:
       fail-fast: false
-      # One event at a time: each job commits and pushes its own state.
-      max-parallel: 1
+      # Every due event checks at once. Check jobs never push: each hands its
+      # state and result to the notify job, which commits them all together.
       matrix:
         event: ${{ fromJSON(needs.plan.outputs.events) }}
     env:
@@ -106,37 +107,72 @@ jobs:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: python3 record_run.py --event "$EVENT"
 
-      - name: Render GitHub notification
-        if: >-
-          steps.monitor.outputs.changed == 'true' ||
-          steps.monitor.outputs.block_summary_due == 'true'
+      - name: Save check result
+        if: always()
         env:
-          HYROX_STATE_PATH: ${{ steps.monitor.outputs.snapshot }}
-          HYROX_CHANGES: ${{ steps.monitor.outputs.changes }}
-          HYROX_NOTIFY_USERS: ${{ vars.HYROX_NOTIFY_USERS }}
-        run: python notify.py
+          OUTCOME: ${{ steps.monitor.outcome }}
+          CHANGES: ${{ steps.monitor.outputs.changes }}
+        run: |
+          mkdir -p results
+          jq -n --arg event "$EVENT" --arg outcome "$OUTCOME" --argjson changes "${CHANGES:-[]}" \
+            '{event: $event, outcome: $outcome, changes: $changes}' > "results/$EVENT.json"
 
-      # One persistent issue per event; matched with or without the leading
-      # icon, which the Anaheim issue gained after it was created.
+      # Both paths keep their place in the artifact, so the notify job can
+      # download every event's artifact straight over its own checkout.
+      - name: Hand state to the notify job
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: check-${{ matrix.event }}
+          path: |
+            state/${{ matrix.event }}/
+            results/${{ matrix.event }}.json
+          if-no-files-found: error
+          retention-days: 7
+
+  # One comment per run, however many events it checked, then one state push.
+  notify:
+    needs: [plan, check]
+    if: always() && needs.plan.outputs.events != '' && needs.plan.outputs.events != '[]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/download-artifact@v7
+        with:
+          pattern: check-*
+          merge-multiple: true
+
+      - name: Render GitHub notification
+        id: render
+        env:
+          HYROX_SUMMARY_DUE: ${{ needs.plan.outputs.summary_due }}
+          HYROX_NOTIFY_USERS: ${{ vars.HYROX_NOTIFY_USERS }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: python3 notify.py
+
       - name: Post GitHub notification
-        if: >-
-          steps.monitor.outputs.changed == 'true' ||
-          steps.monitor.outputs.block_summary_due == 'true'
+        id: post
+        if: steps.render.outputs.notify == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
-          TITLE: ${{ steps.monitor.outputs.issue_title }}
+          TITLE: ${{ steps.render.outputs.issue_title }}
         run: |
-          export PLAIN_TITLE="${TITLE#🟢 }"
-          issue_number="$(gh issue list --state open --search "$PLAIN_TITLE in:title" --json number,title --jq '.[] | select(.title == env.TITLE or .title == env.PLAIN_TITLE) | .number' | head -1)"
+          issue_number="$(gh issue list --state open --search "\"$TITLE\" in:title" --json number,title --jq '.[] | select(.title == env.TITLE) | .number' | head -1)"
           if [ -n "$issue_number" ]; then
-            gh issue edit "$issue_number" --title "$TITLE"
             gh issue comment "$issue_number" --body-file notification.md
           else
             gh issue create --title "$TITLE" --body-file notification.md
           fi
 
-      # Notify first: if issue delivery ever fails, the old state remains and
-      # the next scheduled run retries the alert instead of silently losing it.
-      - name: Persist rolling state
-        if: always()
-        run: .github/persist-state.sh "state/$EVENT"
+      # Notify first: if issue delivery fails, the observations stay unsaved so
+      # the next run sees the same change and retries the alert. The attempts
+      # are still logged, so the dashboard shows the run and the hour is spent.
+      - name: Persist state
+        if: steps.render.outcome == 'success' && steps.post.outcome != 'failure'
+        run: .github/persist-state.sh state/
+
+      - name: Persist run status only
+        if: failure() && (steps.render.outcome == 'failure' || steps.post.outcome == 'failure')
+        run: .github/persist-state.sh state/*/run-status.json
