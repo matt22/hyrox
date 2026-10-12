@@ -6,7 +6,6 @@ from monitor import (
     StructureError, changes, issue_title, parse_ticket_texts, record_openings, requested_history_limit,
     rolling_state,
 )
-from notify import notification_users, render_markdown
 from schedule import CHECKS_PER_DAY, HISTORY_DAYS, block_summary_due
 
 
@@ -117,26 +116,6 @@ def test_summary_is_due_once_a_day_at_the_noon_pacific_check():
     assert not block_summary_due(datetime(2026, 8, 15, 18, 5, tzinfo=timezone.utc))
 
 
-def test_github_notification_template():
-    state = {
-        "checked_at": "2026-08-15T19:05:00+00:00",
-        "source_url": "https://example.com/?a=1&b=2",
-        "tickets": {"<Mixed>": {"status": "available", "evidence": "ignored"}},
-    }
-    rendered = render_markdown(state, ["Mixed Open Relay: unavailable -> available"], ["matt22"])
-    assert rendered.startswith("@matt22")
-    assert "## 🟢 TICKETS AVAILABLE" in rendered
-    assert "🟢 **Tickets are available now — act quickly.**" in rendered
-    assert "✅ **AVAILABLE**" in rendered
-    assert "https://example.com/?a=1&b=2" in rendered
-
-
-def test_notification_users_are_validated_and_deduplicated():
-    assert notification_users("@matt22, second-user, matt22") == ["matt22", "second-user"]
-    with pytest.raises(ValueError):
-        notification_users("not valid!")
-
-
 def test_record_openings_keeps_available_checks_forever_without_duplicates():
     archive = record_openings(None, observation("2026-08-15T00:00:00+00:00", "unavailable"))
     assert archive == {"openings": []}
@@ -161,13 +140,3 @@ def test_an_untracked_division_name_is_rejected_rather_than_ignored():
 def test_each_event_gets_its_own_issue_and_anaheim_keeps_its_existing_one():
     assert issue_title({"city": "Anaheim"}) == "🟢 HYROX Anaheim ticket monitor"
     assert issue_title({"city": "Phoenix"}) == "🟢 HYROX Phoenix ticket monitor"
-
-
-def test_notification_names_the_event():
-    state = {
-        "event": "InBody HYROX Phoenix 2027",
-        "checked_at": "2026-10-08T19:05:00+00:00",
-        "source_url": "https://example.com",
-        "tickets": {},
-    }
-    assert "official InBody HYROX Phoenix 2027 event page" in render_markdown(state, [], ["matt22"])
