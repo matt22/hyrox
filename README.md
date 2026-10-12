@@ -22,8 +22,9 @@ Charity, Adaptive, Pro, Spectator, and Youngstars tickets are explicitly exclude
 The monitor attempts one check per event in each of eight local hours (the event's
 `run_hours` in its own `timezone`): midnight, 1 AM, and hourly from 7 AM through noon.
 That is a ceiling, not a target — no event is checked more than eight times a day. A
-dispatched run's `plan` job decides which events are due, and a matrix job checks each
-one in turn.
+dispatched run's `plan` job decides which events are due, a matrix job checks them all in
+parallel, and a final `notify` job posts one combined comment and commits every event's
+state in a single push.
 
 The workflow has no cron of its own. GitHub delivers `schedule` events on a best-effort
 basis — this repo was receiving roughly a quarter of them, 30-60 minutes late — so
@@ -47,9 +48,10 @@ reads the wall clock in `America/Los_Angeles`, the cadence needs no adjustment a
 daylight saving; the earlier fixed-UTC cron silently lost an hour every summer.
 
 The first successful run establishes a baseline. Later status changes post immediately
-to one persistent GitHub issue per event and explicitly mention the repository owner, which
-triggers GitHub's normal email notification. When there is no change, a status comment
-is posted once at the end of each requested block: the 1 AM and noon Pacific checks.
+to a single persistent GitHub issue shared by every event, and explicitly mention the
+repository owner, which triggers GitHub's normal email notification. Each run posts at
+most one comment, however many events it checked. When nothing changed, a daily status
+summary is posted at the noon Pacific check.
 Every successful check is committed to `state/<event-key>/current.json`, which retains the latest
 16 observations: eight checks per day for two days. The dashboard renders that full
 rolling history and labels it with the rate actually achieved, so a day that ran short
@@ -79,10 +81,12 @@ Routine checks contain no AI calls; Codex can be used separately to inspect fail
 4. Run **HYROX ticket availability** manually once to establish the baseline. After
    activating a new event, run it once with **event** set to its key.
 
-Notifications use restrained GitHub-Flavored Markdown: a clear callout, compact status
-table, official event link, and timestamp. An availability opening is headed
-`🟢 TICKETS AVAILABLE` and begins with a green attention marker. Each event's persistent issue
-is titled `🟢 HYROX <City> ticket monitor`, so GitHub's notification-email subject
+Notifications use restrained GitHub-Flavored Markdown: a callout listing every change by
+city, then one table with a row per active event (dates, open count, and its open
+divisions, pre-sale date, or failed check), each linking to that event's dashboard page.
+Events with open tickets sort first. An opening is headed
+`🟢 TICKETS AVAILABLE — <City>, …` and begins with a green attention marker. The shared
+issue is titled `🟢 HYROX ticket monitor`, so GitHub's notification-email subject
 also carries the green-circle icon. GitHub controls the remaining email UI.
 
 To mention more accounts later, add a repository variable named `HYROX_NOTIFY_USERS`
