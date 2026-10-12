@@ -33,8 +33,10 @@ PACIFIC = ZoneInfo("America/Los_Angeles")
 RUN_HOURS = (0, 1, 7, 8, 9, 10, 11, 12)
 CHECKS_PER_DAY = len(RUN_HOURS)
 HISTORY_DAYS = 2
-# One heartbeat at the final check of each contiguous block of RUN_HOURS.
-SUMMARY_HOURS = (1, 12)
+# One combined status summary a day, at the final Pacific run hour. It covers
+# every active event, so it is keyed to Pacific rather than each event's zone:
+# an Arizona event would otherwise summarise an hour apart in winter.
+SUMMARY_HOURS = (12,)
 # One attempt per run hour, which pins the workflow to at most eight runs a
 # day. An hour is spent as soon as an attempt is logged for it, successful or
 # not: a failed check is recorded in state/run-status.json and shown on the
@@ -208,6 +210,7 @@ def main() -> int:
         print(f"{key}: {'due' if should_run else 'skip'} — {reason}", file=sys.stderr)
     print(f"due={'true' if due_keys else 'false'}")
     print(f"events={json.dumps(due_keys)}")
+    print(f"summary_due={'true' if block_summary_due() else 'false'}")
     return 0
 
 

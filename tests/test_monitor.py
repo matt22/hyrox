@@ -110,9 +110,10 @@ def test_total_openings_decrements_when_opening_observation_is_evicted():
     assert state["meta"]["total_openings"] == 0
 
 
-def test_summary_is_due_only_at_block_endpoints():
-    assert block_summary_due(datetime(2026, 8, 15, 8, 5, tzinfo=timezone.utc))  # 1:05 AM PDT
+def test_summary_is_due_once_a_day_at_the_noon_pacific_check():
     assert block_summary_due(datetime(2026, 8, 15, 19, 5, tzinfo=timezone.utc))  # 12:05 PM PDT
+    assert block_summary_due(datetime(2026, 12, 15, 20, 5, tzinfo=timezone.utc))  # 12:05 PM PST
+    assert not block_summary_due(datetime(2026, 8, 15, 8, 5, tzinfo=timezone.utc))  # 1:05 AM PDT
     assert not block_summary_due(datetime(2026, 8, 15, 18, 5, tzinfo=timezone.utc))
 
 
