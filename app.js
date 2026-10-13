@@ -440,6 +440,7 @@ function renderPreSale(event) {
   badge.innerHTML = '<span class="h-1.5 w-1.5 rounded-full bg-cyan shadow-[0_0_8px_#27d3f2]"></span>Pre-sale';
   const sale = event.first_ticket_sale_date;
   const saleNote = !sale ? 'Date not announced'
+    : event.ticket_sale_note ? escapeHtml(event.ticket_sale_note)
     : event.first_ticket_sale_date_confirmed ? 'Confirmed by HYROX' : 'Estimate · not yet announced';
   document.querySelector('#summary').innerHTML = [
     summaryCard('Tickets on sale', sale ? `${event.first_ticket_sale_date_confirmed ? '' : '~'}${formatCalendarDate(sale, { year: 'numeric' })}` : 'TBA', saleNote, 'text-cyan'),

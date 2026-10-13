@@ -55,8 +55,9 @@
     "event_url": "https://hyrox.com/event/hyrox-las-vegas-26-27/",
     "source_url": null,
     "first_competition_date": "2027-03-12",
-    "first_ticket_sale_date": "2026-11-20",
-    "first_ticket_sale_date_confirmed": false,
+    "first_ticket_sale_date": "2026-10-13",
+    "first_ticket_sale_date_confirmed": true,
+    "ticket_sale_note": "Early access 10 AM · public Oct 15",
     "divisions_tracked": [
       "Men's Open Singles",
       "Women's Open Singles",
