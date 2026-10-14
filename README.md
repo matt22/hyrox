@@ -4,7 +4,7 @@ A deterministic Python 3 + Playwright monitor for HYROX ticket shops. Every even
 [`config/events.json`](config/events.json) with `status: "active"` and a `source_url` is
 checked — currently Anaheim 2026 (the dashboard default) and Phoenix 2027. Each event
 keeps its own state under `state/<event-key>/` and is scheduled in its own timezone.
-An active event whose `source_url` is still `null` (Las Vegas 2027, early access 2026-10-13; Hanoi 2027, sale date TBA) gets a pre-sale
+An active event whose `source_url` is still `null` (Las Vegas 2027, early access 2026-10-13; Hanoi 2027, sale 2026-10-22) gets a pre-sale
 dashboard page with its sale date and venue but is not checked; set its shop URL to start
 monitoring it.
 It tracks these ticket categories only:
