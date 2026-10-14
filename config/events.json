@@ -45,6 +45,30 @@
     "notify_users": ["matt22"],
     "is_default": false
   },
+  "hanoi-2027": {
+    "name": "HYROX Hanoi 2027",
+    "city": "Hanoi",
+    "year": 2027,
+    "timezone": "Asia/Ho_Chi_Minh",
+    "venue": null,
+    "event_dates": "2027-03-06 to 2027-03-07",
+    "event_url": "https://hyrox.com/event/hyrox-hanoi/",
+    "source_url": null,
+    "first_competition_date": "2027-03-06",
+    "first_ticket_sale_date": null,
+    "first_ticket_sale_date_confirmed": false,
+    "divisions_tracked": [
+      "Men's Open Singles",
+      "Women's Open Singles",
+      "Women's Open Doubles",
+      "Mixed Open Doubles",
+      "Mixed Open Relay"
+    ],
+    "run_hours": [0, 1, 7, 8, 9, 10, 11, 12],
+    "status": "active",
+    "notify_users": ["matt22"],
+    "is_default": false
+  },
   "las-vegas-2027": {
     "name": "HYROX Las Vegas 2027",
     "city": "Las Vegas",
