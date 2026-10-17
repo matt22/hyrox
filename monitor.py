@@ -118,11 +118,15 @@ def candidate_blocks(page: Page) -> list[str]:
             if 3 <= len(text) <= 2_000:
                 blocks.append(text)
     # A fallback for simpler shops where every option is merely a button/link.
+    # Single-day Vivenu cards are one button whose only status cue is its
+    # aria-label ("Add 1 ... to the cart"), so read that alongside the text.
     for selector in ("button", "a"):
         locator = page.locator(selector)
         for index in range(min(locator.count(), 500)):
             try:
-                text = normalize(locator.nth(index).inner_text(timeout=500))
+                element = locator.nth(index)
+                label = element.get_attribute("aria-label", timeout=500) or ""
+                text = normalize(f"{element.inner_text(timeout=500)} {label}")
             except Exception:
                 continue
             if text:
