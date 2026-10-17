@@ -104,6 +104,7 @@
     "event_dates": "2027-05-13 to 2027-05-16",
     "event_url": "https://hyrox.com/event/hyrox-san-diego-26-27/",
     "source_url": null,
+    "first_competition_date": "2027-05-13",
     "first_ticket_sale_date": "2027-01-21",
     "first_ticket_sale_date_confirmed": false,
     "divisions_tracked": [
@@ -114,7 +115,7 @@
       "Mixed Open Relay"
     ],
     "run_hours": [0, 1, 7, 8, 9, 10, 11, 12],
-    "status": "upcoming",
+    "status": "active",
     "notify_users": ["matt22"],
     "is_default": false
   },
@@ -127,6 +128,7 @@
     "event_dates": "2027-05-21 to 2027-05-23",
     "event_url": "https://hyrox.com/event/hyrox-portland-26-27/",
     "source_url": null,
+    "first_competition_date": "2027-05-21",
     "first_ticket_sale_date": "2027-01-29",
     "first_ticket_sale_date_confirmed": false,
     "divisions_tracked": [
@@ -137,7 +139,7 @@
       "Mixed Open Relay"
     ],
     "run_hours": [0, 1, 7, 8, 9, 10, 11, 12],
-    "status": "upcoming",
+    "status": "active",
     "notify_users": ["matt22"],
     "is_default": false
   }
