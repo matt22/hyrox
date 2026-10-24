@@ -1,6 +1,6 @@
 {
   "meta": {
-    "total_openings": 0,
+    "total_openings": 1,
     "retention_days": 2,
     "max_observations": 16,
     "observation_count": 16,
@@ -8,24 +8,24 @@
     "window_end": "2026-10-24T19:06:33+00:00",
     "openings": {
       "Men's Open Singles": {
-        "available_observations": 16,
+        "available_observations": 0,
         "opening_transitions": 0
       },
       "Women's Open Singles": {
-        "available_observations": 16,
+        "available_observations": 0,
         "opening_transitions": 0
       },
       "Women's Open Doubles": {
-        "available_observations": 16,
+        "available_observations": 0,
         "opening_transitions": 0
       },
       "Mixed Open Doubles": {
-        "available_observations": 16,
+        "available_observations": 0,
         "opening_transitions": 0
       },
       "Mixed Open Relay": {
         "available_observations": 16,
-        "opening_transitions": 0
+        "opening_transitions": 1
       }
     }
   },
@@ -36,19 +36,19 @@
       "checked_at": "2026-10-23T07:14:43+00:00",
       "tickets": {
         "Men's Open Singles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Men's Open Singles UNAVAILABLE HYROX MEN | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Men's Open Singles UNAVAILABLE HYROX MEN | Friday Friday December 4 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Men's Open Singles UNAVAILABLE"
         },
         "Women's Open Singles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Women's Open Singles UNAVAILABLE HYROX WOMEN | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Women's Open Singles UNAVAILABLE HYROX WOMEN | Friday Friday December 4 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Women's Open Singles U"
         },
         "Women's Open Doubles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Women's Open Doubles UNAVAILABLE HYROX DOUBLES WOMEN | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. Price per person plus service fee - 2 tickets for a Doubles Team will be automatically added to your cart. Read more $394.05 | Women's Open Doubles UNAVAILABLE HYROX DOUBLES WOMEN | Friday Friday December 4 | Please check the event page for the provisional star"
         },
         "Mixed Open Doubles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Mixed Open Doubles UNAVAILABLE HYROX DOUBLES MIXED | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available for ALL age categories. Price per person plus service fee - 2 tickets for a Doubles Team will be automatically added to your cart. Please note a Mixed Doubles Team must be made up of 1 Male and 1 Female. Read more $394.05 | Mixed Open Doubles UNAVAILABLE HYROX DOUBLES MIXED | Friday Friday December 4 | Please"
         },
         "Mixed Open Relay": {
@@ -56,7 +56,9 @@
           "evidence": "Mixed Open Relay UNAVAILABLE HYROX MIXED RELAY | Friday Friday December 4 | Please check the event page for the provisional start windows. Please note a Mixed Relay Team must be made up of 2 Male and 2 Female. Price per person plus service fee - 4 tickets for a Relay Team will be automatically added to your cart. Read more $404.70 | Mixed Open Relay Add 1 HYROX MIXED RELAY | Friday to the cart"
         }
       },
-      "opened": []
+      "opened": [
+        "Mixed Open Relay"
+      ]
     },
     {
       "event": "Centr HYROX Anaheim 2026",
@@ -64,19 +66,19 @@
       "checked_at": "2026-10-23T08:15:25+00:00",
       "tickets": {
         "Men's Open Singles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Men's Open Singles UNAVAILABLE HYROX MEN | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Men's Open Singles UNAVAILABLE HYROX MEN | Friday Friday December 4 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Men's Open Singles UNAVAILABLE"
         },
         "Women's Open Singles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Women's Open Singles UNAVAILABLE HYROX WOMEN | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Women's Open Singles UNAVAILABLE HYROX WOMEN | Friday Friday December 4 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Women's Open Singles U"
         },
         "Women's Open Doubles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Women's Open Doubles UNAVAILABLE HYROX DOUBLES WOMEN | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. Price per person plus service fee - 2 tickets for a Doubles Team will be automatically added to your cart. Read more $394.05 | Women's Open Doubles UNAVAILABLE HYROX DOUBLES WOMEN | Friday Friday December 4 | Please check the event page for the provisional star"
         },
         "Mixed Open Doubles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Mixed Open Doubles UNAVAILABLE HYROX DOUBLES MIXED | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available for ALL age categories. Price per person plus service fee - 2 tickets for a Doubles Team will be automatically added to your cart. Please note a Mixed Doubles Team must be made up of 1 Male and 1 Female. Read more $394.05 | Mixed Open Doubles UNAVAILABLE HYROX DOUBLES MIXED | Friday Friday December 4 | Please"
         },
         "Mixed Open Relay": {
@@ -92,19 +94,19 @@
       "checked_at": "2026-10-23T14:06:39+00:00",
       "tickets": {
         "Men's Open Singles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Men's Open Singles UNAVAILABLE HYROX MEN | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Men's Open Singles UNAVAILABLE HYROX MEN | Friday Friday December 4 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Men's Open Singles UNAVAILABLE"
         },
         "Women's Open Singles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Women's Open Singles UNAVAILABLE HYROX WOMEN | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Women's Open Singles UNAVAILABLE HYROX WOMEN | Friday Friday December 4 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Women's Open Singles U"
         },
         "Women's Open Doubles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Women's Open Doubles UNAVAILABLE HYROX DOUBLES WOMEN | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. Price per person plus service fee - 2 tickets for a Doubles Team will be automatically added to your cart. Read more $394.05 | Women's Open Doubles UNAVAILABLE HYROX DOUBLES WOMEN | Friday Friday December 4 | Please check the event page for the provisional star"
         },
         "Mixed Open Doubles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Mixed Open Doubles UNAVAILABLE HYROX DOUBLES MIXED | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available for ALL age categories. Price per person plus service fee - 2 tickets for a Doubles Team will be automatically added to your cart. Please note a Mixed Doubles Team must be made up of 1 Male and 1 Female. Read more $394.05 | Mixed Open Doubles UNAVAILABLE HYROX DOUBLES MIXED | Friday Friday December 4 | Please"
         },
         "Mixed Open Relay": {
@@ -120,19 +122,19 @@
       "checked_at": "2026-10-23T15:14:56+00:00",
       "tickets": {
         "Men's Open Singles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Men's Open Singles UNAVAILABLE HYROX MEN | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Men's Open Singles UNAVAILABLE HYROX MEN | Friday Friday December 4 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Men's Open Singles UNAVAILABLE"
         },
         "Women's Open Singles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Women's Open Singles UNAVAILABLE HYROX WOMEN | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Women's Open Singles UNAVAILABLE HYROX WOMEN | Friday Friday December 4 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Women's Open Singles U"
         },
         "Women's Open Doubles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Women's Open Doubles UNAVAILABLE HYROX DOUBLES WOMEN | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. Price per person plus service fee - 2 tickets for a Doubles Team will be automatically added to your cart. Read more $394.05 | Women's Open Doubles UNAVAILABLE HYROX DOUBLES WOMEN | Friday Friday December 4 | Please check the event page for the provisional star"
         },
         "Mixed Open Doubles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Mixed Open Doubles UNAVAILABLE HYROX DOUBLES MIXED | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available for ALL age categories. Price per person plus service fee - 2 tickets for a Doubles Team will be automatically added to your cart. Please note a Mixed Doubles Team must be made up of 1 Male and 1 Female. Read more $394.05 | Mixed Open Doubles UNAVAILABLE HYROX DOUBLES MIXED | Friday Friday December 4 | Please"
         },
         "Mixed Open Relay": {
@@ -148,19 +150,19 @@
       "checked_at": "2026-10-23T16:14:56+00:00",
       "tickets": {
         "Men's Open Singles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Men's Open Singles UNAVAILABLE HYROX MEN | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Men's Open Singles UNAVAILABLE HYROX MEN | Friday Friday December 4 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Men's Open Singles UNAVAILABLE"
         },
         "Women's Open Singles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Women's Open Singles UNAVAILABLE HYROX WOMEN | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Women's Open Singles UNAVAILABLE HYROX WOMEN | Friday Friday December 4 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Women's Open Singles U"
         },
         "Women's Open Doubles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Women's Open Doubles UNAVAILABLE HYROX DOUBLES WOMEN | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. Price per person plus service fee - 2 tickets for a Doubles Team will be automatically added to your cart. Read more $394.05 | Women's Open Doubles UNAVAILABLE HYROX DOUBLES WOMEN | Friday Friday December 4 | Please check the event page for the provisional star"
         },
         "Mixed Open Doubles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Mixed Open Doubles UNAVAILABLE HYROX DOUBLES MIXED | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available for ALL age categories. Price per person plus service fee - 2 tickets for a Doubles Team will be automatically added to your cart. Please note a Mixed Doubles Team must be made up of 1 Male and 1 Female. Read more $394.05 | Mixed Open Doubles UNAVAILABLE HYROX DOUBLES MIXED | Friday Friday December 4 | Please"
         },
         "Mixed Open Relay": {
@@ -176,19 +178,19 @@
       "checked_at": "2026-10-23T17:06:35+00:00",
       "tickets": {
         "Men's Open Singles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Men's Open Singles UNAVAILABLE HYROX MEN | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Men's Open Singles UNAVAILABLE HYROX MEN | Friday Friday December 4 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Men's Open Singles UNAVAILABLE"
         },
         "Women's Open Singles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Women's Open Singles UNAVAILABLE HYROX WOMEN | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Women's Open Singles UNAVAILABLE HYROX WOMEN | Friday Friday December 4 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Women's Open Singles U"
         },
         "Women's Open Doubles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Women's Open Doubles UNAVAILABLE HYROX DOUBLES WOMEN | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. Price per person plus service fee - 2 tickets for a Doubles Team will be automatically added to your cart. Read more $394.05 | Women's Open Doubles UNAVAILABLE HYROX DOUBLES WOMEN | Friday Friday December 4 | Please check the event page for the provisional star"
         },
         "Mixed Open Doubles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Mixed Open Doubles UNAVAILABLE HYROX DOUBLES MIXED | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available for ALL age categories. Price per person plus service fee - 2 tickets for a Doubles Team will be automatically added to your cart. Please note a Mixed Doubles Team must be made up of 1 Male and 1 Female. Read more $394.05 | Mixed Open Doubles UNAVAILABLE HYROX DOUBLES MIXED | Friday Friday December 4 | Please"
         },
         "Mixed Open Relay": {
@@ -204,19 +206,19 @@
       "checked_at": "2026-10-23T18:16:10+00:00",
       "tickets": {
         "Men's Open Singles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Men's Open Singles UNAVAILABLE HYROX MEN | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Men's Open Singles UNAVAILABLE HYROX MEN | Friday Friday December 4 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Men's Open Singles UNAVAILABLE"
         },
         "Women's Open Singles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Women's Open Singles UNAVAILABLE HYROX WOMEN | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Women's Open Singles UNAVAILABLE HYROX WOMEN | Friday Friday December 4 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Women's Open Singles U"
         },
         "Women's Open Doubles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Women's Open Doubles UNAVAILABLE HYROX DOUBLES WOMEN | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. Price per person plus service fee - 2 tickets for a Doubles Team will be automatically added to your cart. Read more $394.05 | Women's Open Doubles UNAVAILABLE HYROX DOUBLES WOMEN | Friday Friday December 4 | Please check the event page for the provisional star"
         },
         "Mixed Open Doubles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Mixed Open Doubles UNAVAILABLE HYROX DOUBLES MIXED | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available for ALL age categories. Price per person plus service fee - 2 tickets for a Doubles Team will be automatically added to your cart. Please note a Mixed Doubles Team must be made up of 1 Male and 1 Female. Read more $394.05 | Mixed Open Doubles UNAVAILABLE HYROX DOUBLES MIXED | Friday Friday December 4 | Please"
         },
         "Mixed Open Relay": {
@@ -232,19 +234,19 @@
       "checked_at": "2026-10-23T19:06:31+00:00",
       "tickets": {
         "Men's Open Singles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Men's Open Singles UNAVAILABLE HYROX MEN | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Men's Open Singles UNAVAILABLE HYROX MEN | Friday Friday December 4 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Men's Open Singles UNAVAILABLE"
         },
         "Women's Open Singles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Women's Open Singles UNAVAILABLE HYROX WOMEN | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Women's Open Singles UNAVAILABLE HYROX WOMEN | Friday Friday December 4 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Women's Open Singles U"
         },
         "Women's Open Doubles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Women's Open Doubles UNAVAILABLE HYROX DOUBLES WOMEN | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. Price per person plus service fee - 2 tickets for a Doubles Team will be automatically added to your cart. Read more $394.05 | Women's Open Doubles UNAVAILABLE HYROX DOUBLES WOMEN | Friday Friday December 4 | Please check the event page for the provisional star"
         },
         "Mixed Open Doubles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Mixed Open Doubles UNAVAILABLE HYROX DOUBLES MIXED | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available for ALL age categories. Price per person plus service fee - 2 tickets for a Doubles Team will be automatically added to your cart. Please note a Mixed Doubles Team must be made up of 1 Male and 1 Female. Read more $394.05 | Mixed Open Doubles UNAVAILABLE HYROX DOUBLES MIXED | Friday Friday December 4 | Please"
         },
         "Mixed Open Relay": {
@@ -260,19 +262,19 @@
       "checked_at": "2026-10-24T07:06:36+00:00",
       "tickets": {
         "Men's Open Singles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Men's Open Singles UNAVAILABLE HYROX MEN | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Men's Open Singles UNAVAILABLE HYROX MEN | Friday Friday December 4 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Men's Open Singles HYROX MEN |"
         },
         "Women's Open Singles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Women's Open Singles UNAVAILABLE HYROX WOMEN | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Women's Open Singles UNAVAILABLE HYROX WOMEN | Friday Friday December 4 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Women's Open Singles U"
         },
         "Women's Open Doubles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Women's Open Doubles UNAVAILABLE HYROX DOUBLES WOMEN | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. Price per person plus service fee - 2 tickets for a Doubles Team will be automatically added to your cart. Read more $394.05 | Women's Open Doubles UNAVAILABLE HYROX DOUBLES WOMEN | Friday Friday December 4 | Please check the event page for the provisional star"
         },
         "Mixed Open Doubles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Mixed Open Doubles UNAVAILABLE HYROX DOUBLES MIXED | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available for ALL age categories. Price per person plus service fee - 2 tickets for a Doubles Team will be automatically added to your cart. Please note a Mixed Doubles Team must be made up of 1 Male and 1 Female. Read more $394.05 | Mixed Open Doubles UNAVAILABLE HYROX DOUBLES MIXED | Friday Friday December 4 | Please"
         },
         "Mixed Open Relay": {
@@ -288,19 +290,19 @@
       "checked_at": "2026-10-24T08:06:39+00:00",
       "tickets": {
         "Men's Open Singles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Men's Open Singles UNAVAILABLE HYROX MEN | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Men's Open Singles UNAVAILABLE HYROX MEN | Friday Friday December 4 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Men's Open Singles UNAVAILABLE"
         },
         "Women's Open Singles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Women's Open Singles UNAVAILABLE HYROX WOMEN | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Women's Open Singles UNAVAILABLE HYROX WOMEN | Friday Friday December 4 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Women's Open Singles U"
         },
         "Women's Open Doubles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Women's Open Doubles UNAVAILABLE HYROX DOUBLES WOMEN | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. Price per person plus service fee - 2 tickets for a Doubles Team will be automatically added to your cart. Read more $394.05 | Women's Open Doubles UNAVAILABLE HYROX DOUBLES WOMEN | Friday Friday December 4 | Please check the event page for the provisional star"
         },
         "Mixed Open Doubles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Mixed Open Doubles UNAVAILABLE HYROX DOUBLES MIXED | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available for ALL age categories. Price per person plus service fee - 2 tickets for a Doubles Team will be automatically added to your cart. Please note a Mixed Doubles Team must be made up of 1 Male and 1 Female. Read more $394.05 | Mixed Open Doubles UNAVAILABLE HYROX DOUBLES MIXED | Friday Friday December 4 | Please"
         },
         "Mixed Open Relay": {
@@ -316,19 +318,19 @@
       "checked_at": "2026-10-24T14:06:34+00:00",
       "tickets": {
         "Men's Open Singles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Men's Open Singles UNAVAILABLE HYROX MEN | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Men's Open Singles UNAVAILABLE HYROX MEN | Friday Friday December 4 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Men's Open Singles UNAVAILABLE"
         },
         "Women's Open Singles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Women's Open Singles UNAVAILABLE HYROX WOMEN | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Women's Open Singles UNAVAILABLE HYROX WOMEN | Friday Friday December 4 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Women's Open Singles U"
         },
         "Women's Open Doubles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Women's Open Doubles UNAVAILABLE HYROX DOUBLES WOMEN | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. Price per person plus service fee - 2 tickets for a Doubles Team will be automatically added to your cart. Read more $394.05 | Women's Open Doubles UNAVAILABLE HYROX DOUBLES WOMEN | Friday Friday December 4 | Please check the event page for the provisional star"
         },
         "Mixed Open Doubles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Mixed Open Doubles UNAVAILABLE HYROX DOUBLES MIXED | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available for ALL age categories. Price per person plus service fee - 2 tickets for a Doubles Team will be automatically added to your cart. Please note a Mixed Doubles Team must be made up of 1 Male and 1 Female. Read more $394.05 | Mixed Open Doubles UNAVAILABLE HYROX DOUBLES MIXED | Friday Friday December 4 | Please"
         },
         "Mixed Open Relay": {
@@ -344,19 +346,19 @@
       "checked_at": "2026-10-24T15:06:40+00:00",
       "tickets": {
         "Men's Open Singles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Men's Open Singles UNAVAILABLE HYROX MEN | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Men's Open Singles UNAVAILABLE HYROX MEN | Friday Friday December 4 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Men's Open Singles UNAVAILABLE"
         },
         "Women's Open Singles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Women's Open Singles UNAVAILABLE HYROX WOMEN | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Women's Open Singles UNAVAILABLE HYROX WOMEN | Friday Friday December 4 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Women's Open Singles U"
         },
         "Women's Open Doubles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Women's Open Doubles UNAVAILABLE HYROX DOUBLES WOMEN | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. Price per person plus service fee - 2 tickets for a Doubles Team will be automatically added to your cart. Read more $394.05 | Women's Open Doubles UNAVAILABLE HYROX DOUBLES WOMEN | Friday Friday December 4 | Please check the event page for the provisional star"
         },
         "Mixed Open Doubles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Mixed Open Doubles UNAVAILABLE HYROX DOUBLES MIXED | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available for ALL age categories. Price per person plus service fee - 2 tickets for a Doubles Team will be automatically added to your cart. Please note a Mixed Doubles Team must be made up of 1 Male and 1 Female. Read more $394.05 | Mixed Open Doubles UNAVAILABLE HYROX DOUBLES MIXED | Friday Friday December 4 | Please"
         },
         "Mixed Open Relay": {
@@ -372,19 +374,19 @@
       "checked_at": "2026-10-24T16:06:43+00:00",
       "tickets": {
         "Men's Open Singles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Men's Open Singles UNAVAILABLE HYROX MEN | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Men's Open Singles UNAVAILABLE HYROX MEN | Friday Friday December 4 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Men's Open Singles UNAVAILABLE"
         },
         "Women's Open Singles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Women's Open Singles UNAVAILABLE HYROX WOMEN | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Women's Open Singles UNAVAILABLE HYROX WOMEN | Friday Friday December 4 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Women's Open Singles U"
         },
         "Women's Open Doubles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Women's Open Doubles UNAVAILABLE HYROX DOUBLES WOMEN | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. Price per person plus service fee - 2 tickets for a Doubles Team will be automatically added to your cart. Read more $394.05 | Women's Open Doubles UNAVAILABLE HYROX DOUBLES WOMEN | Friday Friday December 4 | Please check the event page for the provisional star"
         },
         "Mixed Open Doubles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Mixed Open Doubles UNAVAILABLE HYROX DOUBLES MIXED | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available for ALL age categories. Price per person plus service fee - 2 tickets for a Doubles Team will be automatically added to your cart. Please note a Mixed Doubles Team must be made up of 1 Male and 1 Female. Read more $394.05 | Mixed Open Doubles UNAVAILABLE HYROX DOUBLES MIXED | Friday Friday December 4 | Please"
         },
         "Mixed Open Relay": {
@@ -400,19 +402,19 @@
       "checked_at": "2026-10-24T17:06:35+00:00",
       "tickets": {
         "Men's Open Singles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Men's Open Singles UNAVAILABLE HYROX MEN | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Men's Open Singles UNAVAILABLE HYROX MEN | Friday Friday December 4 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Men's Open Singles UNAVAILABLE"
         },
         "Women's Open Singles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Women's Open Singles UNAVAILABLE HYROX WOMEN | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Women's Open Singles UNAVAILABLE HYROX WOMEN | Friday Friday December 4 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Women's Open Singles U"
         },
         "Women's Open Doubles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Women's Open Doubles UNAVAILABLE HYROX DOUBLES WOMEN | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. Price per person plus service fee - 2 tickets for a Doubles Team will be automatically added to your cart. Read more $394.05 | Women's Open Doubles UNAVAILABLE HYROX DOUBLES WOMEN | Friday Friday December 4 | Please check the event page for the provisional star"
         },
         "Mixed Open Doubles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Mixed Open Doubles UNAVAILABLE HYROX DOUBLES MIXED | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available for ALL age categories. Price per person plus service fee - 2 tickets for a Doubles Team will be automatically added to your cart. Please note a Mixed Doubles Team must be made up of 1 Male and 1 Female. Read more $394.05 | Mixed Open Doubles UNAVAILABLE HYROX DOUBLES MIXED | Friday Friday December 4 | Please"
         },
         "Mixed Open Relay": {
@@ -428,19 +430,19 @@
       "checked_at": "2026-10-24T18:07:21+00:00",
       "tickets": {
         "Men's Open Singles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Men's Open Singles UNAVAILABLE HYROX MEN | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Men's Open Singles UNAVAILABLE HYROX MEN | Friday Friday December 4 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Men's Open Singles UNAVAILABLE"
         },
         "Women's Open Singles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Women's Open Singles UNAVAILABLE HYROX WOMEN | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Women's Open Singles UNAVAILABLE HYROX WOMEN | Friday Friday December 4 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Women's Open Singles H"
         },
         "Women's Open Doubles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Women's Open Doubles UNAVAILABLE HYROX DOUBLES WOMEN | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. Price per person plus service fee - 2 tickets for a Doubles Team will be automatically added to your cart. Read more $394.05 | Women's Open Doubles UNAVAILABLE HYROX DOUBLES WOMEN | Friday Friday December 4 | Please check the event page for the provisional star"
         },
         "Mixed Open Doubles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Mixed Open Doubles UNAVAILABLE HYROX DOUBLES MIXED | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available for ALL age categories. Price per person plus service fee - 2 tickets for a Doubles Team will be automatically added to your cart. Please note a Mixed Doubles Team must be made up of 1 Male and 1 Female. Read more $394.05 | Mixed Open Doubles UNAVAILABLE HYROX DOUBLES MIXED | Friday Friday December 4 | Please"
         },
         "Mixed Open Relay": {
@@ -456,19 +458,19 @@
       "checked_at": "2026-10-24T19:06:33+00:00",
       "tickets": {
         "Men's Open Singles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Men's Open Singles UNAVAILABLE HYROX MEN | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Men's Open Singles UNAVAILABLE HYROX MEN | Friday Friday December 4 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Men's Open Singles UNAVAILABLE"
         },
         "Women's Open Singles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Women's Open Singles UNAVAILABLE HYROX WOMEN | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Women's Open Singles UNAVAILABLE HYROX WOMEN | Friday Friday December 4 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $207.68 | Women's Open Singles U"
         },
         "Women's Open Doubles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Women's Open Doubles UNAVAILABLE HYROX DOUBLES WOMEN | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. Price per person plus service fee - 2 tickets for a Doubles Team will be automatically added to your cart. Read more $394.05 | Women's Open Doubles UNAVAILABLE HYROX DOUBLES WOMEN | Friday Friday December 4 | Please check the event page for the provisional star"
         },
         "Mixed Open Doubles": {
-          "status": "available",
+          "status": "unavailable",
           "evidence": "Mixed Open Doubles UNAVAILABLE HYROX DOUBLES MIXED | Thursday Thursday December 3 | Please check the event page for the provisional start windows. World Championship Qualification available for ALL age categories. Price per person plus service fee - 2 tickets for a Doubles Team will be automatically added to your cart. Please note a Mixed Doubles Team must be made up of 1 Male and 1 Female. Read more $394.05 | Mixed Open Doubles UNAVAILABLE HYROX DOUBLES MIXED | Friday Friday December 4 | Please"
         },
         "Mixed Open Relay": {
