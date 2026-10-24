@@ -191,6 +191,14 @@ def open_ticket_shop(page: Page, url: str) -> None:
                 # Some vendors keep a long-lived connection; parsing can still proceed.
                 return
 
+    # Vivenu event pages can expose the shop as a button rather than a link.
+    # Click it before parsing so the division controls in the purchase flow are
+    # observed; the landing-page prose is not availability evidence.
+    button = page.get_by_role("button", name=re.compile(r"buy\s+tickets?", re.I))
+    if button.count():
+        button.first.click(timeout=8_000)
+        page.wait_for_timeout(3_000)
+
 
 def capture(page: Page, directory: Path, error: Exception) -> None:
     directory.mkdir(parents=True, exist_ok=True)
