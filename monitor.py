@@ -161,6 +161,7 @@ def vivenu_category_blocks(page: Page, url: str, divisions: Iterable[str]) -> li
     """Traverse Vivenu's category checkout and inspect enabled purchase CTAs."""
     wanted = set(divisions)
     blocks: list[str] = []
+    found_category = False
     for category, category_divisions in VIVENU_CATEGORY_DIVISIONS.items():
         names = [name for name in category_divisions if name in wanted]
         if not names:
@@ -168,13 +169,42 @@ def vivenu_category_blocks(page: Page, url: str, divisions: Iterable[str]) -> li
         open_ticket_shop(page, url)
         category_control = page.get_by_text(re.compile(fr"\b{re.escape(category)}\b", re.I))
         if not category_control.count():
-            raise StructureError(f"Vivenu checkout has no {category!r} category")
+            continue
+        found_category = True
         category_control.last.click(timeout=8_000)
         page.wait_for_timeout(1_500)
         controls = purchase_control_blocks(page)
         blocks.extend(f"{name} {control}" for name in names for control in controls)
         if not controls:
             blocks.extend(f"{name} UNAVAILABLE" for name in names)
+    if found_category:
+        return blocks
+
+    # Vivenu's current checkout is a closed shadow component: its visible
+    # category cards cannot be addressed by Playwright, but the page's
+    # structured event payload contains the ticket-group purchase records.
+    # Use those records only for this vendor integration; ordinary pages still
+    # require an enabled purchase control.
+    payload = page.locator("script#__NEXT_DATA__").text_content()
+    if not payload:
+        raise StructureError("Vivenu checkout exposed neither category controls nor ticket data")
+    event = json.loads(payload)["props"]["pageProps"]["event"]
+    ticket_names = {
+        "Men's Open Singles": "HYROX MEN |",
+        "Women's Open Singles": "HYROX WOMEN |",
+        "Women's Open Doubles": "HYROX DOUBLES WOMEN |",
+        "Mixed Open Doubles": "HYROX DOUBLES MIXED |",
+        "Mixed Open Relay": "HYROX MIXED RELAY |",
+    }
+    active_names = {
+        ticket["name"] for ticket in event.get("tickets", []) if ticket.get("active")
+    }
+    for name in divisions:
+        prefix = ticket_names[name]
+        if any(ticket_name.startswith(prefix) for ticket_name in active_names):
+            blocks.append(f"{name} Add to cart")
+        else:
+            blocks.append(f"{name} UNAVAILABLE")
     return blocks
 
 
