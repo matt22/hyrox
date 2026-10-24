@@ -161,6 +161,30 @@ def vivenu_category_blocks(page: Page, url: str, divisions: Iterable[str]) -> li
     """Traverse Vivenu's category checkout and inspect enabled purchase CTAs."""
     wanted = set(divisions)
     blocks: list[str] = []
+
+    # The current Vivenu wizard is a closed shadow component. Its structured
+    # event payload is the stable source for the ticket-group purchase records.
+    payload = page.locator("script#__NEXT_DATA__").text_content()
+    if payload:
+        event = json.loads(payload)["props"]["pageProps"]["event"]
+        if event.get("styleOptions", {}).get("useTicketTypeWizard"):
+            ticket_names = {
+                "Men's Open Singles": "HYROX MEN |",
+                "Women's Open Singles": "HYROX WOMEN |",
+                "Women's Open Doubles": "HYROX DOUBLES WOMEN |",
+                "Mixed Open Doubles": "HYROX DOUBLES MIXED |",
+                "Mixed Open Relay": "HYROX MIXED RELAY |",
+            }
+            active_names = {
+                ticket["name"] for ticket in event.get("tickets", []) if ticket.get("active")
+            }
+            for name in divisions:
+                if any(ticket_name.startswith(ticket_names[name]) for ticket_name in active_names):
+                    blocks.append(f"{name} Add to cart")
+                else:
+                    blocks.append(f"{name} UNAVAILABLE")
+            return blocks
+
     found_category = False
     for category, category_divisions in VIVENU_CATEGORY_DIVISIONS.items():
         names = [name for name in category_divisions if name in wanted]
