@@ -166,7 +166,7 @@ def vivenu_category_blocks(page: Page, url: str, divisions: Iterable[str]) -> li
         if not names:
             continue
         open_ticket_shop(page, url)
-        category_control = page.get_by_text(category, exact=True)
+        category_control = page.get_by_text(re.compile(fr"\b{re.escape(category)}\b", re.I))
         if not category_control.count():
             raise StructureError(f"Vivenu checkout has no {category!r} category")
         category_control.last.click(timeout=8_000)
