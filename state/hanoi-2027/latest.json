@@ -1,0 +1,27 @@
+{
+  "checked_at": "2026-10-24T20:09:23+00:00",
+  "event": "HYROX Hanoi 2027",
+  "source_url": "https://vietnam.hyrox.com/event/hyrox-hanoi-season-26-27-31sau9?useEmbed=true",
+  "tickets": {
+    "Men's Open Singles": {
+      "evidence": "Men's Open Singles Add to cart",
+      "status": "available"
+    },
+    "Mixed Open Doubles": {
+      "evidence": "Mixed Open Doubles Add to cart",
+      "status": "available"
+    },
+    "Mixed Open Relay": {
+      "evidence": "Mixed Open Relay Add to cart",
+      "status": "available"
+    },
+    "Women's Open Doubles": {
+      "evidence": "Women's Open Doubles Add to cart",
+      "status": "available"
+    },
+    "Women's Open Singles": {
+      "evidence": "Women's Open Singles Add to cart",
+      "status": "available"
+    }
+  }
+}
