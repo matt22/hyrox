@@ -14,7 +14,7 @@ BLOCKS = [
     "Women's Open Singles Friday - Buy now",
     "Women's Open Doubles Sunday - Unavailable",
     "Mixed Open Doubles Saturday - Select tickets",
-    "Mixed Open Relay Friday - Available",
+    "Mixed Open Relay Friday - Add 1 HYROX MIXED RELAY to the cart",
     "Men's Pro Singles - Buy now",
     "Women's Charity Singles - Buy now",
     "Spectator tickets - Buy now",
@@ -29,6 +29,18 @@ def test_only_tracks_requested_categories():
     ]
     assert result["Men's Open Singles"].status == "unavailable"
     assert result["Women's Open Singles"].status == "available"
+
+
+def test_qualification_copy_does_not_make_sold_out_ticket_available():
+    blocks = [
+        "Men's Open Singles UNAVAILABLE HYROX MEN | World Championship Qualification available ONLY for 60+ age categories",
+        "Women's Open Singles UNAVAILABLE HYROX WOMEN | World Championship Qualification available ONLY for 60+ age categories",
+        "Women's Open Doubles UNAVAILABLE HYROX DOUBLES WOMEN | World Championship Qualification available ONLY for 60+ age categories",
+        "Mixed Open Doubles UNAVAILABLE HYROX DOUBLES MIXED | World Championship Qualification available for ALL age categories",
+        "Mixed Open Relay UNAVAILABLE HYROX MIXED RELAY | Price per person plus service fee",
+    ]
+    result = parse_ticket_texts(blocks)
+    assert all(ticket.status == "unavailable" for ticket in result.values())
 
 
 def test_missing_category_is_unexpected_structure():

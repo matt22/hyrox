@@ -38,7 +38,7 @@ TARGET_WIZARD_PATHS = {
     "Mixed Open Relay": ("Relay", "Open", "Mixed"),
 }
 EXCLUDED = re.compile(r"\b(charity|adaptive|pro|spectator|youngstars?)\b", re.I)
-AVAILABLE = re.compile(r"\b(buy|select|register|available|from\s+\$|add)\b", re.I)
+PURCHASE_CTA = re.compile(r"\b(?:buy|select|register)\b|\badd\b.*\bcart\b", re.I)
 UNAVAILABLE = re.compile(r"\b(sold\s*out|unavailable|waitlist|closed|coming\s*soon)\b", re.I)
 
 
@@ -59,7 +59,7 @@ def normalize(value: str) -> str:
 def classify(text: str) -> str:
     if UNAVAILABLE.search(text):
         return "unavailable"
-    if AVAILABLE.search(text):
+    if PURCHASE_CTA.search(text):
         return "available"
     return "unknown"
 
@@ -102,34 +102,26 @@ def parse_ticket_texts(blocks: Iterable[str], divisions: Iterable[str] | None = 
     return results
 
 
-def candidate_blocks(page: Page) -> list[str]:
-    selectors = (
-        "article", "li", "tr", "[class*='ticket']", "[class*='product']",
-        "[class*='card']", "[role='listitem']", "form",
-    )
+def purchase_control_blocks(page: Page) -> list[str]:
+    """Return only enabled purchase controls; page prose is never availability evidence."""
     blocks: list[str] = []
-    for selector in selectors:
-        locator = page.locator(selector)
-        for index in range(min(locator.count(), 500)):
-            try:
-                text = normalize(locator.nth(index).inner_text(timeout=1_000))
-            except Exception:
-                continue
-            if 3 <= len(text) <= 2_000:
-                blocks.append(text)
-    # A fallback for simpler shops where every option is merely a button/link.
-    # Single-day Vivenu cards are one button whose only status cue is its
-    # aria-label ("Add 1 ... to the cart"), so read that alongside the text.
     for selector in ("button", "a"):
         locator = page.locator(selector)
         for index in range(min(locator.count(), 500)):
             try:
                 element = locator.nth(index)
+                if not element.is_enabled():
+                    continue
+                if element.get_attribute("disabled", timeout=500) is not None:
+                    continue
+                if element.get_attribute("aria-disabled", timeout=500) == "true":
+                    continue
                 label = element.get_attribute("aria-label", timeout=500) or ""
-                text = normalize(f"{element.inner_text(timeout=500)} {label}")
+                visible = normalize(element.inner_text(timeout=500))
+                text = normalize(f"{visible} {label}")
             except Exception:
                 continue
-            if text:
+            if text and PURCHASE_CTA.search(text):
                 blocks.append(text)
     return list(dict.fromkeys(blocks))
 
@@ -151,21 +143,12 @@ def wizard_blocks(page: Page, divisions: Iterable[str]) -> list[str]:
                 raise StructureError(f"Vivenu wizard path for {name} has no {step!r} option")
             button.first.click(timeout=8_000)
             page.wait_for_timeout(750)
-        text = normalize(page.locator("body").inner_text(timeout=5_000))
-        if not text:
-            raise StructureError(f"Vivenu wizard returned an empty result for {name}")
-        # Vivenu may show excluded alternatives beside the selected Open branch.
-        # Keep only leaf-ish blocks with recognizable status wording, and reject
-        # exclusions per ticket card rather than rejecting the whole results page.
-        status_blocks = [
-            block for block in candidate_blocks(page)
-            if not EXCLUDED.search(block) and classify(block) != "unknown"
-        ]
-        if not status_blocks and not EXCLUDED.search(text) and classify(text) != "unknown":
-            status_blocks = [text]
-        if not status_blocks:
-            raise StructureError(f"Vivenu returned no recognizable Open ticket status for {name}")
-        blocks.extend(f"{name} {block}" for block in status_blocks)
+        controls = purchase_control_blocks(page)
+        if controls:
+            blocks.extend(f"{name} {control}" for control in controls)
+        else:
+            # No enabled purchase control is the only unavailable signal.
+            blocks.append(f"{name} UNAVAILABLE")
     return blocks
 
 
@@ -230,7 +213,7 @@ def check(url: str, diagnostics: Path, headless: bool = True,
         page = context.new_page()
         try:
             open_ticket_shop(page, url)
-            blocks = wizard_blocks(page, divisions) if "usa.hyrox.com/tickets/" in page.url else candidate_blocks(page)
+            blocks = wizard_blocks(page, divisions) if "usa.hyrox.com/tickets/" in page.url else purchase_control_blocks(page)
             return parse_ticket_texts(blocks, divisions)
         except Exception as error:
             capture(page, diagnostics, error)
