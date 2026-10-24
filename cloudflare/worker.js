@@ -4,18 +4,19 @@
  * GitHub's own `schedule` events are best-effort and this repo has been getting
  * roughly a quarter of them, 30-60 minutes late, so the workflow has no cron of
  * its own. The schedule lives here instead: the Worker's cron trigger in
- * wrangler.toml lists RUN_HOURS' eight Pacific hours directly, each at :05, as
- * UTC — unioned across both DST offsets, since a fixed UTC hour means a
- * different Pacific hour in PDT than in PST. Ten UTC hours cover the eight
- * Pacific ones across both seasons; on any given day two of those ticks fall
- * outside RUN_HOURS for the season in effect and are cheap no-ops.
+ * wrangler.toml lists the Pacific RUN_HOURS and Hanoi's local RUN_HOURS at
+ * :05 in UTC. Ten UTC hours cover the Pacific schedule across both DST
+ * seasons; Hanoi is UTC+7 year-round and adds UTC 0-5. The Worker filters each
+ * active event in its own timezone, so Hanoi ticks do not dispatch Pacific
+ * checks outside their schedule.
  *
  * `scheduled()` below still exists to dispatch only for a Pacific hour that
  * has neither an observation nor a logged attempt, and it still checks
  * RUN_HOURS first — not because the cron might tick outside them (it won't,
  * by construction), but because it's the single source of truth for whether a
- * given tick's Pacific hour should dispatch at all, independent of what the
- * cron string happens to contain. That caps GitHub at eight runs a day. A
+ * given event's local hour should dispatch at all, independent of what the
+ * cron string happens to contain. That caps each event at eight checks a day.
+ * A
  * dropped tick here costs that hour's check for the day; Cloudflare does not
  * retry a failed tick, and there is no later tick in the same hour to fall
  * back on.

@@ -7,21 +7,24 @@ compatibility_date = "2026-09-13"
 workers_dev = false
 preview_urls = false
 
-# The 8 RUN_HOURS (schedule.py), each at :05, expressed directly as UTC hours —
-# one cron trigger, a single comma-separated field, no code-side filtering.
+# The Pacific RUN_HOURS and Hanoi's local RUN_HOURS, each at :05, expressed as
+# UTC hours — one cron trigger, a single comma-separated field, no code-side
+# filtering at the cron layer.
 # Pacific's UTC offset changes twice a year, so RUN_HOURS maps to a different
 # set of UTC hours in PDT (UTC-7) and PST (UTC-8); the field below is the union
 # of both, 10 distinct hours covering 6 that overlap between the two seasons.
-# On any given day only one offset is live, so exactly 8 of these 10 ticks land
-# in a Pacific run hour and dispatch; the other 2 land outside RUN_HOURS for
-# the current season and the Worker returns immediately, spending nothing.
+# Hanoi is UTC+7 year-round, so its 0,1,7-12 local hours add UTC 0-5; the
+# existing UTC 17,18 ticks cover Hanoi's local midnight and 1 AM. On any given
+# day exactly 8 of the Pacific ticks land in a Pacific run hour; Hanoi ticks
+# are additional opportunities for the Hanoi event and do not affect the
+# Pacific per-day ceiling.
 # `test_worker_cron_reaches_every_run_hour_in_both_offsets` in
 # tests/test_schedule.py checks this field against RUN_HOURS directly, so a
 # change to either one without the other fails CI, and
 # test_worker_cron_reaches_every_active_events_run_hours_in_its_own_zone does
 # the same for every active event in config/events.json.
 #
-# 10 invocations a day against a 100,000/day free-plan allowance, and one of
+# 16 invocations a day against a 100,000/day free-plan allowance, and one of
 # five free cron triggers (the free plan caps a Worker at 5, but a single
 # trigger's cron string can list any number of hours, so this still costs 1).
 #
@@ -30,4 +33,4 @@ preview_urls = false
 # the same hour to fall back on, so a dropped :05 tick costs that hour's check
 # for the day.
 [triggers]
-crons = ["5 7,8,9,14,15,16,17,18,19,20 * * *"]
+crons = ["5 0,1,2,3,4,5,7,8,9,14,15,16,17,18,19,20 * * *"]
