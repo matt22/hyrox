@@ -37,6 +37,11 @@ TARGET_WIZARD_PATHS = {
     "Mixed Open Doubles": ("Doubles", "Open", "Mixed"),
     "Mixed Open Relay": ("Relay", "Open", "Mixed"),
 }
+VIVENU_CATEGORY_DIVISIONS = {
+    "Singles": ("Men's Open Singles", "Women's Open Singles"),
+    "Doubles": ("Women's Open Doubles", "Mixed Open Doubles"),
+    "Relay": ("Mixed Open Relay",),
+}
 EXCLUDED = re.compile(r"\b(charity|adaptive|pro|spectator|youngstars?)\b", re.I)
 PURCHASE_CTA = re.compile(r"\b(?:buy|select|register)\b|\badd\b.*\bcart\b", re.I)
 UNAVAILABLE = re.compile(r"\b(sold\s*out|unavailable|waitlist|closed|coming\s*soon)\b", re.I)
@@ -152,6 +157,27 @@ def wizard_blocks(page: Page, divisions: Iterable[str]) -> list[str]:
     return blocks
 
 
+def vivenu_category_blocks(page: Page, url: str, divisions: Iterable[str]) -> list[str]:
+    """Traverse Vivenu's category checkout and inspect enabled purchase CTAs."""
+    wanted = set(divisions)
+    blocks: list[str] = []
+    for category, category_divisions in VIVENU_CATEGORY_DIVISIONS.items():
+        names = [name for name in category_divisions if name in wanted]
+        if not names:
+            continue
+        open_ticket_shop(page, url)
+        category_control = page.get_by_text(category, exact=True)
+        if not category_control.count():
+            raise StructureError(f"Vivenu checkout has no {category!r} category")
+        category_control.last.click(timeout=8_000)
+        page.wait_for_timeout(1_500)
+        controls = purchase_control_blocks(page)
+        blocks.extend(f"{name} {control}" for name in names for control in controls)
+        if not controls:
+            blocks.extend(f"{name} UNAVAILABLE" for name in names)
+    return blocks
+
+
 def open_ticket_shop(page: Page, url: str) -> None:
     page.goto(url, wait_until="domcontentloaded", timeout=60_000)
     page.wait_for_timeout(3_000)
@@ -221,7 +247,12 @@ def check(url: str, diagnostics: Path, headless: bool = True,
         page = context.new_page()
         try:
             open_ticket_shop(page, url)
-            blocks = wizard_blocks(page, divisions) if "usa.hyrox.com/tickets/" in page.url else purchase_control_blocks(page)
+            if "usa.hyrox.com/tickets/" in page.url:
+                blocks = wizard_blocks(page, divisions)
+            elif "vietnam.hyrox.com/event/" in page.url:
+                blocks = vivenu_category_blocks(page, url, divisions)
+            else:
+                blocks = purchase_control_blocks(page)
             return parse_ticket_texts(blocks, divisions)
         except Exception as error:
             capture(page, diagnostics, error)
