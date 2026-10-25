@@ -4,8 +4,8 @@
     "retention_days": 2,
     "max_observations": 16,
     "observation_count": 16,
-    "window_start": "2026-10-23T18:06:31+00:00",
-    "window_end": "2026-10-25T17:06:28+00:00",
+    "window_start": "2026-10-23T19:06:35+00:00",
+    "window_end": "2026-10-25T18:12:14+00:00",
     "openings": {
       "Men's Open Singles": {
         "available_observations": 16,
@@ -16,11 +16,11 @@
         "opening_transitions": 0
       },
       "Women's Open Doubles": {
-        "available_observations": 6,
+        "available_observations": 7,
         "opening_transitions": 1
       },
       "Mixed Open Doubles": {
-        "available_observations": 6,
+        "available_observations": 7,
         "opening_transitions": 1
       },
       "Mixed Open Relay": {
@@ -30,34 +30,6 @@
     }
   },
   "history": [
-    {
-      "event": "HYROX Las Vegas 2027",
-      "source_url": "https://usa.hyrox.com/events/hyrox-las-vegas-season-26-27-9bk1ve",
-      "checked_at": "2026-10-23T18:06:31+00:00",
-      "tickets": {
-        "Men's Open Singles": {
-          "status": "available",
-          "evidence": "Men's Open Singles UNAVAILABLE HYROX MEN | Friday Friday March 12 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $218.33 | Men's Open Singles HYROX MEN | Saturday Saturday March 13 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $218.33 | Men's Open Singles Add 1 HYROX MEN | Friday to"
-        },
-        "Women's Open Singles": {
-          "status": "available",
-          "evidence": "Women's Open Singles UNAVAILABLE HYROX WOMEN | Friday Friday March 12 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $218.33 | Women's Open Singles HYROX WOMEN | Sunday Sunday March 14 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. $218.33 | Women's Open Singles Add 1 HYROX WOMEN | F"
-        },
-        "Women's Open Doubles": {
-          "status": "unavailable",
-          "evidence": "Women's Open Doubles UNAVAILABLE HYROX DOUBLES WOMEN | Friday Friday March 12 | Please check the event page for the provisional start windows. World Championship Qualification available ONLY for 60+ age categories for this division. Price per person plus service fee - 2 tickets for a Doubles Team will be automatically added to your cart. Read more $415.35 | Women's Open Doubles HYROX DOUBLES WOMEN | Sunday Sunday March 14 | Please check the event page for the provisional start windows. World Cha"
-        },
-        "Mixed Open Doubles": {
-          "status": "unavailable",
-          "evidence": "Mixed Open Doubles UNAVAILABLE HYROX DOUBLES MIXED | Friday Friday March 12 | Please check the event page for the provisional start windows. World Championship Qualification available for ALL age categories. Price per person plus service fee - 2 tickets for a Doubles Team will be automatically added to your cart. Please note a Mixed Doubles Team must be made up of 1 Male and 1 Female. Read more $415.35 | Mixed Open Doubles HYROX DOUBLES MIXED | Saturday Saturday March 13 | Please check the event"
-        },
-        "Mixed Open Relay": {
-          "status": "available",
-          "evidence": "Mixed Open Relay Add 1 HYROX MIXED RELAY | Sunday to the cart"
-        }
-      },
-      "opened": []
-    },
     {
       "event": "HYROX Las Vegas 2027",
       "source_url": "https://usa.hyrox.com/events/hyrox-las-vegas-season-26-27-9bk1ve",
@@ -457,6 +429,34 @@
       "event": "HYROX Las Vegas 2027",
       "source_url": "https://usa.hyrox.com/events/hyrox-las-vegas-season-26-27-9bk1ve",
       "checked_at": "2026-10-25T17:06:28+00:00",
+      "tickets": {
+        "Men's Open Singles": {
+          "status": "available",
+          "evidence": "Men's Open Singles Add 1 HYROX MEN | Saturday to the cart"
+        },
+        "Women's Open Singles": {
+          "status": "available",
+          "evidence": "Women's Open Singles Add 1 HYROX WOMEN | Sunday to the cart"
+        },
+        "Women's Open Doubles": {
+          "status": "available",
+          "evidence": "Women's Open Doubles Add 1 HYROX DOUBLES WOMEN | Sunday to the cart"
+        },
+        "Mixed Open Doubles": {
+          "status": "available",
+          "evidence": "Mixed Open Doubles Add 1 HYROX DOUBLES MIXED | Saturday to the cart"
+        },
+        "Mixed Open Relay": {
+          "status": "available",
+          "evidence": "Mixed Open Relay Add 1 HYROX MIXED RELAY | Sunday to the cart"
+        }
+      },
+      "opened": []
+    },
+    {
+      "event": "HYROX Las Vegas 2027",
+      "source_url": "https://usa.hyrox.com/events/hyrox-las-vegas-season-26-27-9bk1ve",
+      "checked_at": "2026-10-25T18:12:14+00:00",
       "tickets": {
         "Men's Open Singles": {
           "status": "available",
