@@ -701,6 +701,33 @@
           "evidence": "Mixed Open Relay UNAVAILABLE HYROX MIXED RELAY | Friday Friday December 4 | Please check the event page for the provisional start windows. Please note a Mixed Relay Team must be made up of 2 Male and 2 Female. Price per person plus service fee - 4 tickets for a Relay Team will be automatically added to your cart. Read more $404.70 | Mixed Open Relay Add 1 HYROX MIXED RELAY | Friday to the cart"
         }
       }
+    },
+    {
+      "event": "Centr HYROX Anaheim 2026",
+      "source_url": "https://usa.hyrox.com/events/hyrox-anaheim-season-26-27-edyxxn",
+      "checked_at": "2026-10-25T15:06:37+00:00",
+      "tickets": {
+        "Men's Open Singles": {
+          "status": "unavailable",
+          "evidence": "Men's Open Singles UNAVAILABLE"
+        },
+        "Women's Open Singles": {
+          "status": "available",
+          "evidence": "Women's Open Singles Add 1 HYROX WOMEN | Sunday to the cart"
+        },
+        "Women's Open Doubles": {
+          "status": "unavailable",
+          "evidence": "Women's Open Doubles UNAVAILABLE"
+        },
+        "Mixed Open Doubles": {
+          "status": "unavailable",
+          "evidence": "Mixed Open Doubles UNAVAILABLE"
+        },
+        "Mixed Open Relay": {
+          "status": "unavailable",
+          "evidence": "Mixed Open Relay UNAVAILABLE"
+        }
+      }
     }
   ]
 }
