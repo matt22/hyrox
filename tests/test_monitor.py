@@ -1,10 +1,12 @@
 from datetime import datetime, timezone
 
 import pytest
+import monitor
+from unittest.mock import Mock
 
 from monitor import (
-    StructureError, changes, parse_ticket_texts, record_openings, requested_history_limit,
-    rolling_state,
+    CHECK_ATTEMPTS, CHECK_RETRY_DELAY_SECONDS, StructureError, changes,
+    parse_ticket_texts, record_openings, requested_history_limit, rolling_state,
 )
 from schedule import CHECKS_PER_DAY, HISTORY_DAYS, block_summary_due
 
@@ -147,3 +149,34 @@ def test_an_event_can_track_a_subset_of_divisions():
 def test_an_untracked_division_name_is_rejected_rather_than_ignored():
     with pytest.raises(ValueError, match="Men's Elite"):
         parse_ticket_texts(BLOCKS, ["Men's Elite Singles"])
+
+
+def test_live_check_has_bounded_retries_for_transient_page_failures(monkeypatch, tmp_path):
+    assert CHECK_ATTEMPTS == 3
+    assert CHECK_RETRY_DELAY_SECONDS == 2
+
+    attempts = []
+    sleeps = []
+
+    def fake_check_once(*args):
+        attempts.append(args)
+        if len(attempts) < CHECK_ATTEMPTS:
+            raise StructureError("temporary page response")
+        return {"Men's Open Singles": monitor.Ticket("unavailable", "test")}
+
+    monkeypatch.setattr(monitor, "check_once", fake_check_once)
+    monkeypatch.setattr(monitor.time, "sleep", sleeps.append)
+
+    result = monitor.check("https://example.com", tmp_path)
+
+    assert result["Men's Open Singles"].status == "unavailable"
+    assert len(attempts) == CHECK_ATTEMPTS
+    assert sleeps == [CHECK_RETRY_DELAY_SECONDS, CHECK_RETRY_DELAY_SECONDS]
+
+
+def test_target_unavailable_status_is_not_confused_by_adjacent_adaptive_card():
+    page = Mock()
+    page.locator.return_value.inner_text.return_value = (
+        "UNAVAILABLE HYROX WOMEN | Friday\\nHYROX ADAPTIVE WOMEN | Sunday"
+    )
+    assert monitor.target_is_unavailable(page, "Women's Open Singles")

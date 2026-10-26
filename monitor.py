@@ -8,6 +8,7 @@ import json
 import os
 import re
 import sys
+import time
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -37,6 +38,13 @@ TARGET_WIZARD_PATHS = {
     "Mixed Open Doubles": ("Doubles", "Open", "Mixed"),
     "Mixed Open Relay": ("Relay", "Open", "Mixed"),
 }
+WIZARD_TARGET_LABELS = {
+    "Men's Open Singles": "HYROX MEN |",
+    "Women's Open Singles": "HYROX WOMEN |",
+    "Women's Open Doubles": "HYROX DOUBLES WOMEN |",
+    "Mixed Open Doubles": "HYROX DOUBLES MIXED |",
+    "Mixed Open Relay": "HYROX MIXED RELAY |",
+}
 VIVENU_CATEGORY_DIVISIONS = {
     "Singles": ("Men's Open Singles", "Women's Open Singles"),
     "Doubles": ("Women's Open Doubles", "Mixed Open Doubles"),
@@ -45,6 +53,8 @@ VIVENU_CATEGORY_DIVISIONS = {
 EXCLUDED = re.compile(r"\b(charity|adaptive|pro|spectator|youngstars?)\b", re.I)
 PURCHASE_CTA = re.compile(r"\b(?:buy|select|register)\b|\badd\b.*\bcart\b", re.I)
 UNAVAILABLE = re.compile(r"\b(sold\s*out|unavailable|waitlist|closed|coming\s*soon)\b", re.I)
+CHECK_ATTEMPTS = 3
+CHECK_RETRY_DELAY_SECONDS = 2
 
 
 class StructureError(RuntimeError):
@@ -131,6 +141,17 @@ def purchase_control_blocks(page: Page) -> list[str]:
     return list(dict.fromkeys(blocks))
 
 
+def target_is_unavailable(page: Page, division: str) -> bool:
+    """Recognize an unavailable target card without accepting adjacent exclusions."""
+    label = re.escape(WIZARD_TARGET_LABELS[division])
+    status = r"(?:sold\s*out|unavailable|waitlist|closed|coming\s*soon)"
+    text = normalize(page.locator("body").inner_text(timeout=5_000))
+    return bool(
+        re.search(rf"{status}.{{0,100}}{label}", text, re.I)
+        or re.search(rf"{label}.{{0,100}}{status}", text, re.I)
+    )
+
+
 def wizard_blocks(page: Page, divisions: Iterable[str]) -> list[str]:
     """Traverse only the explicitly requested Vivenu wizard branches."""
     ticket_url = page.url
@@ -141,19 +162,27 @@ def wizard_blocks(page: Page, divisions: Iterable[str]) -> list[str]:
         page.wait_for_timeout(1_500)
         for step in path:
             button = page.get_by_role("button", name=step, exact=True)
-            if not button.count():
+            try:
+                button.first.wait_for(state="visible", timeout=5_000)
+            except PlaywrightTimeoutError:
                 # Some event configurations omit the redundant Open stage.
                 if step == "Open":
                     continue
                 raise StructureError(f"Vivenu wizard path for {name} has no {step!r} option")
             button.first.click(timeout=8_000)
             page.wait_for_timeout(750)
-        controls = purchase_control_blocks(page)
+        controls = [
+            control for control in purchase_control_blocks(page)
+            if not EXCLUDED.search(control)
+        ]
         if controls:
             blocks.extend(f"{name} {control}" for control in controls)
-        else:
-            # No enabled purchase control is the only unavailable signal.
+        elif target_is_unavailable(page, name):
+            # The target can be unavailable while an adjacent Charity or
+            # Adaptive card remains purchasable.
             blocks.append(f"{name} UNAVAILABLE")
+        else:
+            raise StructureError(f"Vivenu returned no recognizable status for {name}")
     return blocks
 
 
@@ -247,10 +276,12 @@ def open_ticket_shop(page: Page, url: str) -> None:
 
     if "usa.hyrox.com" in page.url:
         button = page.get_by_role("button", name="Buy Tickets", exact=True)
-        if not button.count():
+        try:
+            button.first.wait_for(state="visible", timeout=8_000)
+        except PlaywrightTimeoutError:
             raise StructureError("The canonical ticket shop did not expose its Buy Tickets button")
         button.first.click(timeout=8_000)
-        page.wait_for_timeout(3_000)
+        page.wait_for_timeout(5_000)
         return
 
     ticket_links = page.locator("a", has_text=re.compile(r"buy|ticket|register", re.I))
@@ -288,9 +319,9 @@ def capture(page: Page, directory: Path, error: Exception) -> None:
     page.screenshot(path=str(directory / "page.png"), full_page=True)
 
 
-def check(url: str, diagnostics: Path, headless: bool = True,
-          divisions: Iterable[str] | None = None) -> dict[str, Ticket]:
-    divisions = tracked_divisions(divisions)
+def check_once(url: str, diagnostics: Path, headless: bool,
+               divisions: list[str]) -> dict[str, Ticket]:
+    """Run one isolated browser attempt and retain diagnostics on failure."""
     with sync_playwright() as playwright:
         browser = playwright.chromium.launch(headless=headless)
         context = browser.new_context(
@@ -313,6 +344,21 @@ def check(url: str, diagnostics: Path, headless: bool = True,
             raise
         finally:
             browser.close()
+
+
+def check(url: str, diagnostics: Path, headless: bool = True,
+          divisions: Iterable[str] | None = None) -> dict[str, Ticket]:
+    divisions = tracked_divisions(divisions)
+    last_error: Exception | None = None
+    for attempt in range(CHECK_ATTEMPTS):
+        try:
+            return check_once(url, diagnostics, headless, divisions)
+        except Exception as error:
+            last_error = error
+            if attempt + 1 < CHECK_ATTEMPTS:
+                time.sleep(CHECK_RETRY_DELAY_SECONDS)
+    assert last_error is not None
+    raise last_error
 
 
 def state_payload(tickets: dict[str, Ticket], url: str, event: str) -> dict:
