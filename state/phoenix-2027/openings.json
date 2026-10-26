@@ -3374,6 +3374,33 @@
           "evidence": "Mixed Open Relay UNAVAILABLE HYROX MIXED RELAY | Friday Friday February 26 | Please check the event page for the provisional start windows. Please note a Mixed Relay Team must be made up of 2 Male and 2 Female. Price per person plus service fee - 4 tickets for a Relay Team will be automatically added to your cart. Read more $447.30 | Mixed Open Relay Add 1 HYROX MIXED RELAY | Friday to the cart"
         }
       }
+    },
+    {
+      "event": "InBody HYROX Phoenix 2027",
+      "source_url": "https://usa.hyrox.com/events/hyrox-phoenix-season-26-27-f5qrtn",
+      "checked_at": "2026-10-26T18:06:38+00:00",
+      "tickets": {
+        "Men's Open Singles": {
+          "status": "unavailable",
+          "evidence": "Men's Open Singles UNAVAILABLE"
+        },
+        "Women's Open Singles": {
+          "status": "available",
+          "evidence": "Women's Open Singles Add 1 HYROX WOMEN | Thursday to the cart | Women's Open Singles Add 1 HYROX WOMEN | Sunday to the cart"
+        },
+        "Women's Open Doubles": {
+          "status": "available",
+          "evidence": "Women's Open Doubles Add 1 HYROX DOUBLES WOMEN | Thursday to the cart | Women's Open Doubles Add 1 HYROX DOUBLES WOMEN | Sunday to the cart"
+        },
+        "Mixed Open Doubles": {
+          "status": "available",
+          "evidence": "Mixed Open Doubles Add 1 HYROX DOUBLES MIXED | Thursday to the cart"
+        },
+        "Mixed Open Relay": {
+          "status": "unavailable",
+          "evidence": "Mixed Open Relay UNAVAILABLE"
+        }
+      }
     }
   ]
 }
