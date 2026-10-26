@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-10-25T18:06:31+00:00",
+  "checked_at": "2026-10-26T14:06:35+00:00",
   "event": "Centr HYROX Anaheim 2026",
   "source_url": "https://usa.hyrox.com/events/hyrox-anaheim-season-26-27-edyxxn",
   "tickets": {
@@ -8,8 +8,8 @@
       "status": "unavailable"
     },
     "Mixed Open Doubles": {
-      "evidence": "Mixed Open Doubles UNAVAILABLE",
-      "status": "unavailable"
+      "evidence": "Mixed Open Doubles Add 1 HYROX DOUBLES MIXED | Thursday to the cart",
+      "status": "available"
     },
     "Mixed Open Relay": {
       "evidence": "Mixed Open Relay UNAVAILABLE",
@@ -20,8 +20,8 @@
       "status": "unavailable"
     },
     "Women's Open Singles": {
-      "evidence": "Women's Open Singles UNAVAILABLE",
-      "status": "unavailable"
+      "evidence": "Women's Open Singles Add 1 HYROX WOMEN | Thursday to the cart",
+      "status": "available"
     }
   }
 }
