@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-10-26T19:06:30+00:00",
+  "checked_at": "2026-10-27T07:06:57+00:00",
   "event": "Centr HYROX Anaheim 2026",
   "source_url": "https://usa.hyrox.com/events/hyrox-anaheim-season-26-27-edyxxn",
   "tickets": {
@@ -20,8 +20,8 @@
       "status": "unavailable"
     },
     "Women's Open Singles": {
-      "evidence": "Women's Open Singles UNAVAILABLE",
-      "status": "unavailable"
+      "evidence": "Women's Open Singles Add 1 HYROX WOMEN | Thursday to the cart",
+      "status": "available"
     }
   }
 }
