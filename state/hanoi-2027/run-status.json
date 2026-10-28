@@ -1,7 +1,7 @@
 {
   "meta": {
     "max_attempts": 24,
-    "attempt_count": 13
+    "attempt_count": 14
   },
   "history": [
     {
@@ -107,6 +107,14 @@
       "run_id": 40732322207,
       "run_attempt": 1,
       "run_url": "https://github.com/matt22/hyrox/actions/runs/40732322207"
+    },
+    {
+      "status": "success",
+      "monitor_outcome": "success",
+      "recorded_at": "2026-10-28T18:06:14+00:00",
+      "run_id": 40741832140,
+      "run_attempt": 1,
+      "run_url": "https://github.com/matt22/hyrox/actions/runs/40741832140"
     }
   ]
 }
