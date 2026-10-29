@@ -3860,6 +3860,33 @@
           "evidence": "Mixed Open Relay UNAVAILABLE"
         }
       }
+    },
+    {
+      "event": "InBody HYROX Phoenix 2027",
+      "source_url": "https://usa.hyrox.com/events/hyrox-phoenix-season-26-27-f5qrtn",
+      "checked_at": "2026-10-29T07:06:49+00:00",
+      "tickets": {
+        "Men's Open Singles": {
+          "status": "available",
+          "evidence": "Men's Open Singles Add 1 HYROX MEN | Thursday to the cart"
+        },
+        "Women's Open Singles": {
+          "status": "available",
+          "evidence": "Women's Open Singles Add 1 HYROX WOMEN | Thursday to the cart | Women's Open Singles Add 1 HYROX WOMEN | Friday to the cart | Women's Open Singles Add 1 HYROX WOMEN | Sunday to the cart"
+        },
+        "Women's Open Doubles": {
+          "status": "available",
+          "evidence": "Women's Open Doubles Add 1 HYROX DOUBLES WOMEN | Thursday to the cart | Women's Open Doubles Add 1 HYROX DOUBLES WOMEN | Friday to the cart | Women's Open Doubles Add 1 HYROX DOUBLES WOMEN | Sunday to the cart"
+        },
+        "Mixed Open Doubles": {
+          "status": "available",
+          "evidence": "Mixed Open Doubles Add 1 HYROX DOUBLES MIXED | Thursday to the cart | Mixed Open Doubles Add 1 HYROX DOUBLES MIXED | Friday to the cart | Mixed Open Doubles Add 1 HYROX DOUBLES MIXED | Saturday to the cart"
+        },
+        "Mixed Open Relay": {
+          "status": "available",
+          "evidence": "Mixed Open Relay Add 1 HYROX MIXED RELAY | Friday to the cart"
+        }
+      }
     }
   ]
 }
