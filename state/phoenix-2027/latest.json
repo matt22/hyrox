@@ -1,11 +1,11 @@
 {
-  "checked_at": "2026-10-30T19:06:10+00:00",
+  "checked_at": "2026-10-31T07:06:38+00:00",
   "event": "InBody HYROX Phoenix 2027",
   "source_url": "https://usa.hyrox.com/events/hyrox-phoenix-season-26-27-f5qrtn",
   "tickets": {
     "Men's Open Singles": {
-      "evidence": "Men's Open Singles UNAVAILABLE",
-      "status": "unavailable"
+      "evidence": "Men's Open Singles Add 1 HYROX MEN | Thursday to the cart",
+      "status": "available"
     },
     "Mixed Open Doubles": {
       "evidence": "Mixed Open Doubles Add 1 HYROX DOUBLES MIXED | Thursday to the cart | Mixed Open Doubles Add 1 HYROX DOUBLES MIXED | Friday to the cart | Mixed Open Doubles Add 1 HYROX DOUBLES MIXED | Saturday to the cart",
