@@ -1,11 +1,11 @@
 {
-  "checked_at": "2026-11-01T19:06:40+00:00",
+  "checked_at": "2026-11-01T20:06:38+00:00",
   "event": "Centr HYROX Anaheim 2026",
   "source_url": "https://usa.hyrox.com/events/hyrox-anaheim-season-26-27-edyxxn",
   "tickets": {
     "Men's Open Singles": {
-      "evidence": "Men's Open Singles Add 1 HYROX MEN | Saturday to the cart",
-      "status": "available"
+      "evidence": "Men's Open Singles UNAVAILABLE",
+      "status": "unavailable"
     },
     "Mixed Open Doubles": {
       "evidence": "Mixed Open Doubles UNAVAILABLE",
