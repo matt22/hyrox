@@ -62,7 +62,7 @@ jobs:
   check:
     needs: plan
     if: needs.plan.outputs.events != '' && needs.plan.outputs.events != '[]'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     strategy:
       fail-fast: false
@@ -83,7 +83,7 @@ jobs:
 
       - run: pip install -r requirements.txt
       - run: pytest -q
-      - run: playwright install chromium
+      - run: playwright install --with-deps chromium
 
       - name: Check availability
         id: monitor
