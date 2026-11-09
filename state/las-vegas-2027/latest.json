@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-11-08T20:06:46+00:00",
+  "checked_at": "2026-11-09T08:06:36+00:00",
   "event": "HYROX Las Vegas 2027",
   "source_url": "https://usa.hyrox.com/events/hyrox-las-vegas-season-26-27-9bk1ve",
   "tickets": {
@@ -12,11 +12,11 @@
       "status": "available"
     },
     "Mixed Open Relay": {
-      "evidence": "Mixed Open Relay Add 1 HYROX MIXED RELAY | Sunday to the cart",
-      "status": "available"
+      "evidence": "Mixed Open Relay UNAVAILABLE",
+      "status": "unavailable"
     },
     "Women's Open Doubles": {
-      "evidence": "Women's Open Doubles Add 1 HYROX DOUBLES WOMEN | Friday to the cart | Women's Open Doubles Add 1 HYROX DOUBLES WOMEN | Sunday to the cart",
+      "evidence": "Women's Open Doubles Add 1 HYROX DOUBLES WOMEN | Sunday to the cart",
       "status": "available"
     },
     "Women's Open Singles": {
