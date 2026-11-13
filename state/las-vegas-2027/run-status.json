@@ -7,14 +7,6 @@
     {
       "status": "success",
       "monitor_outcome": "success",
-      "recorded_at": "2026-11-10T17:06:21+00:00",
-      "run_id": 42861262761,
-      "run_attempt": 1,
-      "run_url": "https://github.com/matt22/hyrox/actions/runs/42861262761"
-    },
-    {
-      "status": "success",
-      "monitor_outcome": "success",
       "recorded_at": "2026-11-10T18:06:22+00:00",
       "run_id": 42871561388,
       "run_attempt": 1,
@@ -195,6 +187,14 @@
       "run_id": 43459122629,
       "run_attempt": 1,
       "run_url": "https://github.com/matt22/hyrox/actions/runs/43459122629"
+    },
+    {
+      "status": "success",
+      "monitor_outcome": "success",
+      "recorded_at": "2026-11-13T17:06:21+00:00",
+      "run_id": 43469237543,
+      "run_attempt": 1,
+      "run_url": "https://github.com/matt22/hyrox/actions/runs/43469237543"
     }
   ]
 }
