@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-11-17T19:07:45+00:00",
+  "checked_at": "2026-11-18T07:11:48+00:00",
   "event": "InBody HYROX Phoenix 2027",
   "source_url": "https://usa.hyrox.com/events/hyrox-phoenix-season-26-27-f5qrtn",
   "tickets": {
@@ -8,8 +8,8 @@
       "status": "unavailable"
     },
     "Mixed Open Doubles": {
-      "evidence": "Mixed Open Doubles Add 1 HYROX DOUBLES MIXED | Thursday to the cart",
-      "status": "available"
+      "evidence": "Mixed Open Doubles UNAVAILABLE",
+      "status": "unavailable"
     },
     "Mixed Open Relay": {
       "evidence": "Mixed Open Relay UNAVAILABLE",
