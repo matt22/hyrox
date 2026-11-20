@@ -1,0 +1,9 @@
+{
+  "name": "hyrox-relay-watch",
+  "private": true,
+  "type": "module",
+  "description": "Every-minute watcher for HYROX Mixed Relay tickets, alerting by SMS/push.",
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  }
+}
