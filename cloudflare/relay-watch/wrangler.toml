@@ -21,8 +21,7 @@ SHOP_URL = "https://usa.hyrox.com/tickets/6ae9ed7c0d921b7c5db5a99b"
 # Stop checking after this UTC date (race weekend starts 2027-05-13).
 STOP_AFTER = "2027-05-12"
 
-# Create with: npx wrangler kv namespace create RELAY_WATCH_STATE
-# then paste the id it prints here.
+# KV namespace "hyrox-relay-watch-state" (created 2026-11-20).
 [[kv_namespaces]]
 binding = "STATE"
-id = "REPLACE_WITH_KV_NAMESPACE_ID"
+id = "78237d8633d044238a9ada3ddd3c31f2"
