@@ -18,6 +18,11 @@ on:
       - cloudflare/relay-watch/**
       - .github/workflows/relay-watch-deploy.yml
   workflow_dispatch:
+    inputs:
+      test_alert:
+        description: Also send a test alert to confirm delivery to your phone
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -77,3 +82,7 @@ jobs:
             [ -n "$value" ] || continue
             printf '%s' "$value" | npx --yes wrangler@4 secret put "$name"
           done
+
+      - name: Send test alert
+        if: steps.ready.outputs.deploy == 'true' && inputs.test_alert
+        run: node send-test-alert.js
