@@ -1,0 +1,79 @@
+name: Deploy relay watcher
+
+# Deploys cloudflare/relay-watch (the every-minute Mixed Relay watcher) on any
+# push to main that touches it. Separate from monitor.yml, which this does not
+# trigger or change. Until the repo secrets below exist it runs the tests and
+# skips the deploy with a warning, so a push never fails for a missing secret.
+#
+# Repo secrets (Settings → Secrets and variables → Actions):
+#   CLOUDFLARE_API_TOKEN   required: Workers Scripts edit + Workers KV Storage edit
+#   CLOUDFLARE_ACCOUNT_ID  optional: needed only if the token can see several accounts
+#   PUSHOVER_TOKEN, PUSHOVER_USER                              Pushover alerts
+#   TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM, ALERT_TO  Twilio SMS (optional)
+# At least one complete alert channel is required to deploy.
+on:
+  push:
+    branches: [main]
+    paths:
+      - cloudflare/relay-watch/**
+      - .github/workflows/relay-watch-deploy.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: relay-watch-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: cloudflare/relay-watch
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      PUSHOVER_TOKEN: ${{ secrets.PUSHOVER_TOKEN }}
+      PUSHOVER_USER: ${{ secrets.PUSHOVER_USER }}
+      TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
+      TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
+      TWILIO_FROM: ${{ secrets.TWILIO_FROM }}
+      ALERT_TO: ${{ secrets.ALERT_TO }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Test
+        run: npm test
+
+      - name: Ready to deploy?
+        id: ready
+        run: |
+          missing=""
+          [ -n "$CLOUDFLARE_API_TOKEN" ] || missing="CLOUDFLARE_API_TOKEN"
+          pushover=$([ -n "$PUSHOVER_TOKEN" ] && [ -n "$PUSHOVER_USER" ] && echo yes || true)
+          twilio=$([ -n "$TWILIO_ACCOUNT_SID" ] && [ -n "$TWILIO_AUTH_TOKEN" ] && [ -n "$TWILIO_FROM" ] && [ -n "$ALERT_TO" ] && echo yes || true)
+          [ -n "$pushover$twilio" ] || missing="$missing an alert channel (PUSHOVER_TOKEN + PUSHOVER_USER)"
+          if [ -n "$missing" ]; then
+            echo "::warning::Relay watcher not deployed; missing repo secrets: $missing"
+            echo "deploy=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "deploy=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Deploy Worker
+        if: steps.ready.outputs.deploy == 'true'
+        run: npx --yes wrangler@4 deploy
+
+      # Only secrets that are set are uploaded, so adding Twilio later is just
+      # adding its repo secrets and re-running this workflow.
+      - name: Upload alert secrets
+        if: steps.ready.outputs.deploy == 'true'
+        run: |
+          for name in PUSHOVER_TOKEN PUSHOVER_USER TWILIO_ACCOUNT_SID TWILIO_AUTH_TOKEN TWILIO_FROM ALERT_TO; do
+            value="${!name}"
+            [ -n "$value" ] || continue
+            printf '%s' "$value" | npx --yes wrangler@4 secret put "$name"
+          done

@@ -38,25 +38,30 @@ Set either one or both, as Worker secrets. Each is used only when its secrets ex
 
 ## Deploy
 
-From this folder, logged in with `npx wrangler login`:
+Automatic: [`.github/workflows/relay-watch-deploy.yml`](../../.github/workflows/relay-watch-deploy.yml)
+runs the tests and deploys on every push to `main` that touches this folder (or by
+hand from the Actions tab). It deploys only once these repo secrets exist
+(Settings → Secrets and variables → Actions), and otherwise skips with a warning:
+
+| Secret | |
+| --- | --- |
+| `CLOUDFLARE_API_TOKEN` | Workers Scripts edit + Workers KV Storage edit |
+| `CLOUDFLARE_ACCOUNT_ID` | only if the token can see more than one account |
+| `PUSHOVER_TOKEN`, `PUSHOVER_USER` | Pushover alerts |
+| `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM`, `ALERT_TO` | optional Twilio SMS |
+
+The workflow uploads whichever alert secrets are set to the Worker, so adding a
+channel later is just adding its secrets and re-running the workflow. The KV
+namespace (`hyrox-relay-watch-state`) already exists and is bound in `wrangler.toml`.
+
+Check delivery to your phone before relying on it:
 
 ```sh
-# 1. State store; paste the printed id into wrangler.toml ([[kv_namespaces]] id)
-npx wrangler kv namespace create RELAY_WATCH_STATE
-
-# 2. Confirm your phone gets alerts before deploying
 PUSHOVER_TOKEN=… PUSHOVER_USER=… node send-test-alert.js
-
-# 3. Secrets for the channel(s) you use
-npx wrangler secret put PUSHOVER_TOKEN
-npx wrangler secret put PUSHOVER_USER
-
-# 4. Deploy and watch the first few checks (e.g. "Friday=0")
-npx wrangler deploy
-npx wrangler tail hyrox-relay-watch
 ```
 
-To stop it: `npx wrangler delete hyrox-relay-watch`.
+Watch live checks (one line a minute, e.g. `Friday=0`) with
+`npx wrangler tail hyrox-relay-watch`. To stop it: `npx wrangler delete hyrox-relay-watch`.
 
 To watch a different event, change `EVENT_ID` (the id in the shop's
 `usa.hyrox.com/tickets/<id>` URL), `EVENT_NAME`, `SHOP_URL` and `STOP_AFTER` in
