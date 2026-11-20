@@ -13,9 +13,9 @@ export function sanDiego({ friday = 0, members = 0, relayCategory = 104, extra =
     ],
     tickets: [
       { _id: 'men-fri', name: 'HYROX MEN | Friday', active: true, v: 0, categoryRef: SINGLES },
-      { _id: 'mens-relay-fri', name: 'HYROX MENS RELAY | Friday', active: true, v: 5, categoryRef: RELAY },
-      { _id: '6ae9ed7ca71b78574cb87ec2', name: 'HYROX MIXED RELAY | Friday', active: true, v: friday, categoryRef: RELAY },
-      { _id: '6ae9ed7ca71b78574cb87ec3', name: 'HYROX MIXED RELAY TEAM MEMBER | Friday', active: true, v: members, categoryRef: RELAY, conditionalAvailability: true },
+      { _id: 'mens-relay-fri', name: 'HYROX MENS RELAY | Friday', active: true, v: 5, categoryRef: RELAY, meta: { competition_class_matching_key: 'RELAY_M' } },
+      { _id: '6ae9ed7ca71b78574cb87ec2', name: 'HYROX MIXED RELAY | Friday', active: true, v: friday, categoryRef: RELAY, conditionalAvailability: false, meta: { competition_class_matching_key: 'RELAY_X', competion_day_idx: '2' } },
+      { _id: '6ae9ed7ca71b78574cb87ec3', name: 'HYROX MIXED RELAY TEAM MEMBER | Friday', active: true, v: members, categoryRef: RELAY, conditionalAvailability: true, meta: { competition_class_matching_key: 'RELAY_X', competion_day_idx: '2' } },
       ...extra,
     ],
   };

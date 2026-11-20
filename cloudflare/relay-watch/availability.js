@@ -12,10 +12,21 @@
  * plus three auto-added "HYROX MIXED RELAY TEAM MEMBER | <day>" tickets. The
  * captain ticket decides availability; the team-member count is reported so
  * the alert can say whether a full team of four fits.
+ *
+ * Tickets are recognized two independent ways, so a cosmetic rename or a
+ * metadata change alone does not blind the watcher:
+ *  - HYROX's machine key meta.competition_class_matching_key === "RELAY_X"
+ *    (captain: conditionalAvailability false; team member: true), and
+ *  - the display name pattern below.
+ * Either match counts. Charity, Pro and Adaptive variants are excluded by name.
+ * If neither finds a Mixed Relay ticket the parser throws, and the Worker
+ * sends a "can't read tickets" notice rather than going quiet.
  */
 
 export const CAPTAIN = /^HYROX MIXED RELAY \| (.+)$/i;
 export const TEAM_MEMBER = /^HYROX MIXED RELAY TEAM MEMBER \| (.+)$/i;
+export const MIXED_RELAY_KEY = 'RELAY_X';
+export const EXCLUDED = /\b(CHARITY|PRO|ADAPTIVE)\b/i;
 export const TEAM_SIZE = 4;
 
 export class StructureError extends Error {}
@@ -31,6 +42,23 @@ function remaining(ticket, categories) {
   return cap === null ? own : Math.min(own, cap);
 }
 
+const dayOf = (ticket) => {
+  const parts = (ticket.name || '').split('|');
+  return (parts.length > 1 ? parts[parts.length - 1] : `day ${ticket.meta?.competion_day_idx ?? '?'}`).trim();
+};
+
+/** 'captain', 'member' or null, by machine key first, then by name. */
+export function mixedRelayRole(ticket) {
+  const name = ticket.name || '';
+  if (EXCLUDED.test(name)) return null;
+  if (ticket.meta?.competition_class_matching_key === MIXED_RELAY_KEY) {
+    return ticket.conditionalAvailability ? 'member' : 'captain';
+  }
+  if (TEAM_MEMBER.test(name)) return 'member';
+  if (CAPTAIN.test(name)) return 'captain';
+  return null;
+}
+
 /**
  * @param {object} event Parsed Vivenu events/info payload.
  * @returns {{ days: Array<{day: string, ticketId: string, left: number, membersLeft: number|null, available: boolean}>, available: string[] }}
@@ -42,16 +70,15 @@ export function mixedRelayStatus(event) {
   const categories = new Map((event.categories || []).map((c) => [c.ref, c]));
   const members = new Map();
   for (const ticket of event.tickets) {
-    const match = ticket.active && TEAM_MEMBER.exec(ticket.name || '');
-    if (match) members.set(match[1].trim().toLowerCase(), remaining(ticket, categories));
+    if (ticket.active && mixedRelayRole(ticket) === 'member') {
+      members.set(dayOf(ticket).toLowerCase(), remaining(ticket, categories));
+    }
   }
 
   const days = [];
   for (const ticket of event.tickets) {
-    if (!ticket.active || TEAM_MEMBER.test(ticket.name || '')) continue;
-    const match = CAPTAIN.exec(ticket.name || '');
-    if (!match) continue;
-    const day = match[1].trim();
+    if (!ticket.active || mixedRelayRole(ticket) !== 'captain') continue;
+    const day = dayOf(ticket);
     const left = remaining(ticket, categories);
     if (left === null) {
       throw new StructureError(`No remaining volume on ${ticket.name}`);
