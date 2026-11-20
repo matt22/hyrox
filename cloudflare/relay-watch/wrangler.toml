@@ -1,0 +1,28 @@
+# Every-minute HYROX Mixed Relay watcher. Separate Worker from ../wrangler.toml
+# (the monitor's eight-a-day dispatcher); deploying one never touches the other.
+name = "hyrox-relay-watch"
+main = "worker.js"
+compatibility_date = "2026-11-01"
+
+# Exports only `scheduled`; no public URL.
+workers_dev = false
+preview_urls = false
+
+# Once a minute is the shortest interval Cloudflare cron supports. 1,440
+# invocations a day against the free plan's 100,000, and a second cron
+# trigger of the account's five.
+[triggers]
+crons = ["* * * * *"]
+
+[vars]
+EVENT_ID = "6ae9ed7c0d921b7c5db5a99b"
+EVENT_NAME = "HYROX San Diego"
+SHOP_URL = "https://usa.hyrox.com/tickets/6ae9ed7c0d921b7c5db5a99b"
+# Stop checking after this UTC date (race weekend starts 2027-05-13).
+STOP_AFTER = "2027-05-12"
+
+# Create with: npx wrangler kv namespace create RELAY_WATCH_STATE
+# then paste the id it prints here.
+[[kv_namespaces]]
+binding = "STATE"
+id = "REPLACE_WITH_KV_NAMESPACE_ID"
