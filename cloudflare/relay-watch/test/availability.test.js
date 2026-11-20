@@ -63,3 +63,26 @@ test('describe flags a team that will not fit', () => {
   const [short] = mixedRelayStatus(sanDiego({ friday: 1, members: 1 })).days;
   assert.equal(describe(short), 'Friday: 1 left (only 1 team-member spot left)');
 });
+
+test('renamed ticket is still found by its RELAY_X key', () => {
+  const payload = sanDiego({ friday: 3, members: 9 });
+  payload.tickets[2].name = 'HYROX RELAY MIXED (OPEN) | Friday';
+  payload.tickets[3].name = 'HYROX RELAY MIXED (OPEN) MEMBER | Friday';
+  const status = mixedRelayStatus(payload);
+  assert.deepEqual(status.available, ['Friday']);
+  assert.equal(status.days[0].membersLeft, 9);
+});
+
+test('ticket with the key dropped is still found by name', () => {
+  const payload = sanDiego({ friday: 1 });
+  for (const t of payload.tickets) delete t.meta;
+  assert.deepEqual(mixedRelayStatus(payload).available, ['Friday']);
+});
+
+test('charity, pro and adaptive variants never count', () => {
+  const extra = [
+    { _id: 'c', name: 'CHARITY: RACE FOR IMPACT | HYROX MIXED RELAY | Saturday', active: true, v: 9, categoryRef: RELAY },
+    { _id: 'p', name: 'HYROX PRO MIXED RELAY | Saturday', active: true, v: 9, categoryRef: RELAY, meta: { competition_class_matching_key: 'RELAY_X' } },
+  ];
+  assert.deepEqual(mixedRelayStatus(sanDiego({ extra })).available, []);
+});
